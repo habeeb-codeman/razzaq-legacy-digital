@@ -1,96 +1,61 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Razzaq Automotives Design System - Premium Industrial & Modern Tech */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Brand Colors - Premium Industrial Palette */
+    --background: 210 45% 8%; /* Deep Charcoal/Midnight Blue #0B1726 */
+    --foreground: 40 15% 96%; /* Off-White #F6F4F2 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 210 40% 12%;
+    --card-foreground: 40 15% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 210 40% 10%;
+    --popover-foreground: 40 15% 96%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Energetic Teal for CTAs and accents */
+    --primary: 177 100% 33%; /* #00A89D */
+    --primary-foreground: 210 45% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Slightly lighter industrial tone */
+    --secondary: 210 35% 15%;
+    --secondary-foreground: 40 15% 96%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 30% 20%;
+    --muted-foreground: 40 8% 70%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Industrial Gold for highlights */
+    --accent: 43 100% 67%; /* #FFC857 */
+    --accent-foreground: 210 45% 8%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 40 15% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 25% 25%;
+    --input: 210 25% 18%;
+    --ring: 177 100% 33%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(177 100% 33%), hsl(177 100% 28%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 45% 8%) 0%, hsl(210 50% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 40% 12%), hsl(210 35% 10%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 100% 67%), hsl(43 100% 60%));
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Industrial Shadows and Effects */
+    --shadow-premium: 0 20px 50px -10px hsl(210 45% 4% / 0.5);
+    --shadow-card: 0 8px 32px hsl(210 45% 4% / 0.3);
+    --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.15);
+    --shadow-accent: 0 4px 20px hsl(43 100% 67% / 0.25);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Smooth Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 }
 
@@ -100,6 +65,94 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  /* Premium Button Variants */
+  .btn-hero {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 
+           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
+           transition-all duration-300;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 
+           shadow-accent hover:shadow-xl transform hover:-translate-y-0.5 
+           transition-all duration-300;
+  }
+
+  .btn-outline-hero {
+    @apply border-2 border-primary text-primary bg-transparent 
+           hover:bg-primary hover:text-primary-foreground 
+           shadow-glow hover:shadow-xl transform hover:-translate-y-0.5 
+           transition-all duration-300;
+  }
+
+  /* Card Components */
+  .card-premium {
+    @apply bg-card border border-border rounded-lg p-6 
+           shadow-card hover:shadow-premium 
+           transform hover:-translate-y-1 transition-all duration-300;
+    background: var(--gradient-card);
+  }
+
+  .card-hero {
+    @apply bg-background/50 backdrop-blur-sm border border-border/20 
+           rounded-lg p-8 shadow-premium;
+    background: linear-gradient(145deg, hsl(var(--card) / 0.1), hsl(var(--card) / 0.05));
+  }
+
+  /* Text Styles */
+  .text-hero {
+    @apply text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .text-section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .text-accent-glow {
+    @apply text-accent;
+    text-shadow: 0 0 20px hsl(var(--accent) / 0.5);
+  }
+
+  /* Scroll Animations */
+  .fade-in-up {
+    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+  }
+
+  .fade-in-up.animate {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .parallax {
+    @apply transition-transform duration-75 ease-out;
+  }
+
+  /* Industrial Elements */
+  .industrial-line {
+    @apply h-px bg-gradient-to-r from-transparent via-accent to-transparent;
+  }
+
+  .glow-border {
+    @apply border border-primary/30 shadow-glow;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply text-foreground/80 hover:text-foreground transition-colors duration-300 
+           relative after:content-[''] after:absolute after:w-0 after:h-0.5 
+           after:bottom-0 after:left-0 after:bg-primary after:transition-all 
+           after:duration-300 hover:after:w-full;
   }
 }
