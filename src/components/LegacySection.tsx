@@ -14,18 +14,11 @@ const LegacySection = () => {
       stats: 'Birth of a Vision'
     },
     {
-      year: '1990s',
-      title: 'Leadership Evolution', 
-      description: 'Leadership passed to Mr. Abdul Raqeeb, driving modernization and strategic growth in the automotive sector.',
-      icon: <Users className="w-6 h-6" />,
-      stats: 'New Leadership'
-    },
-    {
       year: '2003',
-      title: 'Market Pioneer',
-      description: 'Pioneered a new market by introducing specialized body parts from Namakkal to Vijayawada, revolutionizing local supply chains.',
-      icon: <TrendingUp className="w-6 h-6" />,
-      stats: 'Market Innovation'
+      title: 'Leadership Evolution & Market Pioneer', 
+      description: 'Leadership passed to Mr. Abdul Raqeeb, who pioneered introducing specialized body parts from Namakkal to Vijayawada, revolutionizing local supply chains.',
+      icon: <Users className="w-6 h-6" />,
+      stats: 'New Leadership & Innovation'
     },
     {
       year: 'Today',
@@ -73,7 +66,7 @@ const LegacySection = () => {
             >
               {/* Content Card */}
               <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'}`}>
-                <div className="card-premium">
+                <div className="glass-card">
                   <div className="flex items-center mb-4">
                     <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg mr-4">
                       <span className="text-primary-foreground">
@@ -116,15 +109,15 @@ const LegacySection = () => {
         >
           {[
             { number: '50+', label: 'Years of Experience' },
-            { number: '1976', label: 'Year Established' },
+            { number: '2003', label: 'Current Leadership' },
             { number: '1000+', label: 'Clients Served' },
             { number: '3', label: 'Generation Legacy' }
           ].map((stat, index) => (
-            <div key={index} className="text-center">
+            <div key={index} className="text-center frosted-glass p-6 rounded-xl">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={inView ? { scale: 1 } : {}}
-                transition={{ duration: 0.5, delay: 1.2 + index * 0.1 }}
+                transition={{ duration: 0.6, delay: 1.2 + index * 0.15, type: "spring", bounce: 0.4 }}
                 className="text-4xl lg:text-5xl font-heading font-bold text-accent mb-2"
               >
                 {stat.number}

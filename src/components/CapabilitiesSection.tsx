@@ -3,6 +3,7 @@ import { useInView } from 'react-intersection-observer';
 import { Truck, Settings, Zap } from 'lucide-react';
 import warehouseInterior from '@/assets/warehouse-interior.jpg';
 import truckInterior from '@/assets/truck-interior.jpg';
+import electricalSystems from '@/assets/electrical-systems.jpg';
 
 const CapabilitiesSection = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -27,7 +28,7 @@ const CapabilitiesSection = () => {
       title: 'Fuel & Electrical Systems',
       description: 'Providing robust fuel tanks, dashboards, and related systems for leading heavy vehicle brands.',
       features: ['Fuel Tank Systems', 'Dashboard Components', 'Electrical Harnesses', 'Control Systems'],
-      image: warehouseInterior
+      image: electricalSystems
     }
   ];
 
@@ -60,7 +61,7 @@ const CapabilitiesSection = () => {
               transition={{ duration: 0.8, delay: index * 0.2 }}
               className="group"
             >
-              <div className="card-premium h-full">
+              <div className="glass-card h-full p-6">
                 {/* Image */}
                 <div className="relative overflow-hidden rounded-lg mb-6">
                   <img 
@@ -69,6 +70,7 @@ const CapabilitiesSection = () => {
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                   <div className="absolute top-4 left-4 flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg">
                     <span className="text-primary-foreground">
                       {capability.icon}

@@ -53,9 +53,10 @@
     --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.15);
     --shadow-accent: 0 4px 20px hsl(43 100% 67% / 0.25);
 
-    /* Smooth Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        /* Enhanced Animations */
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 }
 
@@ -76,38 +77,58 @@
 }
 
 @layer components {
-  /* Premium Button Variants */
+  /* Premium Button Variants with Glass Effects */
   .btn-hero {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 
-           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
-           transition-all duration-300;
+           shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-400 backdrop-blur-sm;
   }
 
   .btn-accent {
     @apply bg-accent text-accent-foreground hover:bg-accent/90 
-           shadow-accent hover:shadow-xl transform hover:-translate-y-0.5 
-           transition-all duration-300;
+           shadow-accent hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-400 backdrop-blur-sm;
   }
 
   .btn-outline-hero {
-    @apply border-2 border-primary text-primary bg-transparent 
-           hover:bg-primary hover:text-primary-foreground 
-           shadow-glow hover:shadow-xl transform hover:-translate-y-0.5 
-           transition-all duration-300;
+    @apply border-2 border-primary/60 text-primary bg-primary/5 backdrop-blur-md
+           hover:bg-primary hover:text-primary-foreground hover:border-primary
+           shadow-glow hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-400;
   }
 
-  /* Card Components */
+  .btn-glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 text-white
+           hover:bg-white/20 hover:border-white/30 
+           transform hover:-translate-y-1 hover:scale-105 
+           transition-all duration-400 rounded-xl;
+  }
+
+  /* Card Components with Glass Effects */
   .card-premium {
-    @apply bg-card border border-border rounded-lg p-6 
+    @apply bg-card/20 backdrop-blur-md border border-border/30 rounded-xl p-6 
            shadow-card hover:shadow-premium 
            transform hover:-translate-y-1 transition-all duration-300;
-    background: var(--gradient-card);
+    background: linear-gradient(145deg, hsl(var(--card) / 0.15), hsl(var(--card) / 0.05));
+    backdrop-filter: blur(12px);
   }
 
   .card-hero {
-    @apply bg-background/50 backdrop-blur-sm border border-border/20 
-           rounded-lg p-8 shadow-premium;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.1), hsl(var(--card) / 0.05));
+    @apply bg-background/30 backdrop-blur-lg border border-border/20 
+           rounded-xl p-8 shadow-premium;
+    background: linear-gradient(145deg, hsl(var(--card) / 0.15), hsl(var(--card) / 0.05));
+    backdrop-filter: blur(16px);
+  }
+
+  .glass-card {
+    @apply bg-background/10 backdrop-blur-xl border border-white/10 
+           rounded-2xl shadow-2xl;
+    backdrop-filter: blur(20px);
+  }
+
+  .frosted-glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
+    backdrop-filter: blur(16px);
   }
 
   /* Text Styles */

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowDown, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import heroTruck from '@/assets/hero-truck.jpg';
+import heroTruck from '@/assets/hero-truck-cinematic.jpg';
 
 const HeroSection = () => {
   const scrollToSection = (sectionId: string) => {
@@ -22,6 +22,8 @@ const HeroSection = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+        {/* Glass overlay effect */}
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-[1px]" />
       </div>
 
       {/* Content */}
@@ -32,7 +34,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-card/20 backdrop-blur-sm border border-accent/30 mb-6"
+            className="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-accent/40 mb-6 shadow-lg"
           >
             <span className="text-accent font-medium">Established 1976</span>
             <span className="mx-2 text-muted-foreground">•</span>
@@ -46,8 +48,8 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-hero mb-6 leading-tight"
           >
-            <span className="block">Powering Progress</span>
-            <span className="block text-accent-glow">Since 1976</span>
+            <span className="block">Engineering Excellence</span>
+            <span className="block text-accent-glow">Driving Innovation</span>
           </motion.h1>
 
           <motion.p
