@@ -51,28 +51,16 @@ const ContactSection = () => {
 
   const contactDetails = [
     {
-      icon: <MapPin className="w-5 h-5" />,
-      title: 'Visit Our Store',
-      details: ['Razzaq Automotives, 3rd Cross Road', 'Auto Nagar, Vijayawada', 'Andhra Pradesh 520007'],
-      action: 'Get Directions'
-    },
-    {
       icon: <Phone className="w-5 h-5" />,
-      title: 'Call Us',
+      title: 'Call Us Directly',
       details: ['+91 888-567-3388 (Mr. Abdul Raqeeb)', '+91 905-297-2421 (Mr. Abdul Aleem, Manager)'],
       action: 'Call Now'
     },
     {
       icon: <Mail className="w-5 h-5" />,
-      title: 'Email Us',
+      title: 'Email Support',
       details: ['razzaqautomotives.vij@gmail.com', 'Quick response within 4 hours'],
       action: 'Send Email'
-    },
-    {
-      icon: <Clock className="w-5 h-5" />,
-      title: 'Business Hours',
-      details: ['Mon-Sat: 9:00am - 8:30pm', 'Sunday: 9:00am - 1:30pm'],
-      action: 'Plan Visit'
     }
   ];
 
@@ -96,7 +84,7 @@ const ContactSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid lg:grid-cols-3 gap-12 mb-16">
           {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -212,12 +200,12 @@ const ContactSection = () => {
             </div>
           </motion.div>
 
-          {/* Contact Information - 2 columns layout */}
+          {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="lg:col-span-2 grid md:grid-cols-2 gap-6"
+            className="space-y-6"
           >
             {contactDetails.map((detail, index) => (
               <motion.div
@@ -225,7 +213,7 @@ const ContactSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
-                className="glass-card group hover:shadow-glow transition-all duration-300 h-fit"
+                className="glass-card group hover:shadow-glow transition-all duration-300"
               >
                 <div className="flex items-start space-x-4">
                   <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -275,6 +263,19 @@ const ContactSection = () => {
           </Button>
         </motion.div>
 
+        {/* Address Line */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center mb-8"
+        >
+          <div className="flex items-center justify-center space-x-2 text-muted-foreground">
+            <MapPin className="w-4 h-4" />
+            <p className="text-lg">Razzaq Automotives, 3rd Cross Road, Auto Nagar, Vijayawada, Andhra Pradesh 520007</p>
+          </div>
+        </motion.div>
+
         {/* Large Google Maps */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -284,7 +285,7 @@ const ContactSection = () => {
         >
           <div className="h-96 w-full">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3825.3742!2d80.6204!3d16.5062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d4c93%3A0x65965501d5bc3c4a!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1703123456789!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3825.3742553876!2d80.62042!3d16.506247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d4c93%3A0x65965501d5bc3c4a!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1703123456789!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0, filter: 'invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1)' }}
