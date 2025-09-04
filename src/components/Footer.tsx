@@ -2,10 +2,11 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Linkedin } from 'lucide-react';
 import razzaqLogo from '@/assets/razzaq-logo.png';
-
 const Footer = () => {
-  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  });
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -14,20 +15,20 @@ const Footer = () => {
       });
     }
   };
-
-  return (
-    <footer className="relative bg-background/95 border-t border-border/20">
+  return <footer className="relative bg-background/95 border-t border-border/20">
       {/* Glassmorphism Background */}
       <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-card/20 backdrop-blur-md" />
       
       <div className="relative container mx-auto px-6 py-16">
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="grid lg:grid-cols-4 md:grid-cols-2 gap-12"
-        >
+        <motion.div ref={ref} initial={{
+        opacity: 0,
+        y: 30
+      }} animate={inView ? {
+        opacity: 1,
+        y: 0
+      } : {}} transition={{
+        duration: 0.8
+      }} className="grid lg:grid-cols-4 md:grid-cols-2 gap-12">
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
@@ -42,25 +43,19 @@ const Footer = () => {
               for TATA, Ashok Leyland, and Bharat Benz parts in Vijayawada.
             </p>
             <div className="flex space-x-4">
-              <motion.a
-                whileHover={{ scale: 1.1 }}
-                href="#"
-                className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
-              >
+              <motion.a whileHover={{
+              scale: 1.1
+            }} href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors">
                 <Facebook className="w-5 h-5 text-primary" />
               </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.1 }}
-                href="#"
-                className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
-              >
+              <motion.a whileHover={{
+              scale: 1.1
+            }} href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors">
                 <Instagram className="w-5 h-5 text-primary" />
               </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.1 }}
-                href="#"
-                className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
-              >
+              <motion.a whileHover={{
+              scale: 1.1
+            }} href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors">
                 <Linkedin className="w-5 h-5 text-primary" />
               </motion.a>
             </div>
@@ -70,21 +65,23 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <div className="space-y-3">
-              {[
-                { label: 'Our Legacy', id: 'legacy' },
-                { label: 'Capabilities', id: 'capabilities' },
-                { label: 'Partnerships', id: 'partnerships' },
-                { label: 'Our Advantage', id: 'advantage' }
-              ].map((item) => (
-                <motion.button
-                  key={item.id}
-                  whileHover={{ x: 5 }}
-                  onClick={() => scrollToSection(item.id)}
-                  className="block text-muted-foreground hover:text-primary transition-colors"
-                >
+              {[{
+              label: 'Our Legacy',
+              id: 'legacy'
+            }, {
+              label: 'Capabilities',
+              id: 'capabilities'
+            }, {
+              label: 'Partnerships',
+              id: 'partnerships'
+            }, {
+              label: 'Our Advantage',
+              id: 'advantage'
+            }].map(item => <motion.button key={item.id} whileHover={{
+              x: 5
+            }} onClick={() => scrollToSection(item.id)} className="block text-muted-foreground hover:text-primary transition-colors">
                   {item.label}
-                </motion.button>
-              ))}
+                </motion.button>)}
             </div>
           </div>
 
@@ -144,15 +141,15 @@ const Footer = () => {
         </motion.div>
 
         {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-12 pt-8 border-t border-border/20 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"
-        >
-          <p className="text-sm text-muted-foreground">
-            © 2024 Razzaq Automotives. All rights reserved. | Powering progress since 1976.
-          </p>
+        <motion.div initial={{
+        opacity: 0
+      }} animate={inView ? {
+        opacity: 1
+      } : {}} transition={{
+        duration: 0.8,
+        delay: 0.4
+      }} className="mt-12 pt-8 border-t border-border/20 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <p className="text-sm text-muted-foreground">© 2025 Razzaq Automotives. All rights reserved.</p>
           <div className="flex space-x-6 text-sm">
             <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
               Privacy Policy
@@ -163,8 +160,6 @@ const Footer = () => {
           </div>
         </motion.div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
