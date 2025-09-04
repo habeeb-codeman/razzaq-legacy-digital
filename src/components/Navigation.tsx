@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import razzaqLogo from '@/assets/razzaq-logo.png';
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -51,12 +52,12 @@ const Navigation = () => {
           <motion.div whileHover={{
           scale: 1.05
         }} className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">R</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+              <img src={razzaqLogo} alt="Razzaq Automotives" className="w-full h-full object-contain" />
             </div>
             <div>
               <h2 className="font-heading font-bold text-xl text-foreground">Razzaq Automotives</h2>
-              <p className="text-muted-foreground text-xs">Estd. 1976</p>
+              <p className="text-accent text-xs font-medium">Estd. 1976</p>
             </div>
           </motion.div>
 
