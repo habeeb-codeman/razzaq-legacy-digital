@@ -247,7 +247,7 @@ const ContactSection = () => {
           className="text-center mb-16"
         >
           <Button
-            onClick={() => window.open('https://g.page/r/CVo8voo1GVplEBM/review', '_blank')}
+            onClick={() => window.open('https://shorturl.at/oGASG', '_blank')}
             className="btn-accent px-8 py-4 text-sm font-medium group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
