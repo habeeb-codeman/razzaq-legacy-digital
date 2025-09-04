@@ -81,27 +81,27 @@
   .btn-hero {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 
            shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
-           transition-all duration-400 backdrop-blur-sm;
+           transition-all duration-300 backdrop-blur-sm;
   }
 
   .btn-accent {
     @apply bg-accent text-accent-foreground hover:bg-accent/90 
            shadow-accent hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
-           transition-all duration-400 backdrop-blur-sm;
+           transition-all duration-300 backdrop-blur-sm;
   }
 
   .btn-outline-hero {
     @apply border-2 border-primary/60 text-primary bg-primary/5 backdrop-blur-md
            hover:bg-primary hover:text-primary-foreground hover:border-primary
            shadow-glow hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
-           transition-all duration-400;
+           transition-all duration-300;
   }
 
   .btn-glass {
     @apply bg-white/10 backdrop-blur-md border border-white/20 text-white
            hover:bg-white/20 hover:border-white/30 
            transform hover:-translate-y-1 hover:scale-105 
-           transition-all duration-400 rounded-xl;
+           transition-all duration-300 rounded-xl;
   }
 
   /* Card Components with Glass Effects */
