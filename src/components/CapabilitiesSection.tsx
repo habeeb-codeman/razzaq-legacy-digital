@@ -70,7 +70,6 @@ const CapabilitiesSection = () => {
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                   <div className="absolute top-4 left-4 flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg">
                     <span className="text-primary-foreground">
                       {capability.icon}

@@ -87,7 +87,7 @@ const Navigation = () => {
       }} exit={{
         opacity: 0,
         height: 0
-      }} className="lg:hidden mt-4 pb-4 border-t border-border/20">
+      }} className="lg:hidden mt-4 pb-4 border-t border-border/20 bg-background/95 backdrop-blur-sm rounded-b-lg">
             <div className="flex flex-col space-y-4 pt-4">
               {navItems.map(item => <button key={item.id} onClick={() => scrollToSection(item.id)} className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors">
                   {item.label}
