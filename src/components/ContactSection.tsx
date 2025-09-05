@@ -269,7 +269,7 @@ const ContactSection = () => {
           </div>
         </motion.div>
 
-        {/* Large Google Maps */}
+        {/* Google Maps (Pinned to Razzaq Automotives, Vijayawada) */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -278,7 +278,7 @@ const ContactSection = () => {
         >
           <div className="h-96 w-full">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3825.419016847346!2d80.61823507532998!3d16.505406484132817!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d4c93%3A0x65965501d5bc3c4a!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1732567890123!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.316334494759!2d80.6480903!3d16.5087592!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35ef65006138db%3A0x3a3cd9089c9e9848!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1693929660000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0, filter: 'invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1)' }}
