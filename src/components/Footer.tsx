@@ -439,7 +439,7 @@ const Footer: React.FC = () => {
               Terms of Service
             </a>
             <a
-              href={`mailto:${EMAIL}`}
+{/*               href={`mailto:${EMAIL}`} */}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               {EMAIL}
