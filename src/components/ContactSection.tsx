@@ -324,76 +324,121 @@
 
 "use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { MapPin, Phone, Mail, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { MapPin, Phone, Mail, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
-const ContactSection = () => {
+const FORM_SUBMIT_AJAX_URL =
+  "https://formsubmit.co/ajax/razzaqautomotives.vij@gmail.com";
+
+const ContactSection: React.FC = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    company: '',
-    email: '',
-    phone: '',
-    message: ''
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
+    message: "",
   });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Message Sent Successfully!",
-      description: "Thank you for your inquiry. We'll get back to you within 24 hours.",
-    });
-
-    setFormData({
-      name: '',
-      company: '',
-      email: '',
-      phone: '',
-      message: ''
-    });
-
-    setIsSubmitting(false);
-  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Build FormData so it mimics a normal form post
+      const payload = new FormData();
+      payload.append("name", formData.name || "");
+      payload.append("company", formData.company || "");
+      payload.append("email", formData.email || "");
+      payload.append("phone", formData.phone || "");
+      payload.append("message", formData.message || "");
+      // Disable CAPTCHA prompt (optional)
+      payload.append("_captcha", "false");
+      // (optional) you can set a template or a redirect, but with AJAX we handle responses client-side:
+      // payload.append("_next", "https://yourdomain.com/thank-you");
+
+      const res = await fetch(FORM_SUBMIT_AJAX_URL, {
+        method: "POST",
+        body: payload,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        // Try to parse json error message if provided
+        let errText = `Failed to send message (status ${res.status})`;
+        try {
+          const json = await res.json();
+          if (json && json.message) errText = json.message;
+        } catch {
+          // ignore parse error
+        }
+        throw new Error(errText);
+      }
+
+      // success
+      toast({
+        title: "Message Sent Successfully!",
+        description:
+          "Thank you for your inquiry. We'll get back to you within 24 hours.",
+      });
+
+      // reset form
+      setFormData({
+        name: "",
+        company: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+    } catch (err: any) {
+      // show error toast
+      toast({
+        title: "Unable to send message",
+        description:
+          err?.message ||
+          "Something went wrong while sending your message. Please try again later.",
+        variant: "destructive",
+      });
+      console.error("FormSubmit error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactDetails = [
     {
       icon: <Phone className="w-5 h-5" />,
-      title: 'Call Us Directly',
+      title: "Call Us Directly",
       details: [
-        '+91 888-567-3388 (Mr. Abdul Raqeeb)',
-        '+91 905-297-2421 (Mr. Abdul Aleem, Manager)'
+        "+91 888-567-3388 (Mr. Abdul Raqeeb)",
+        "+91 905-297-2421 (Mr. Abdul Aleem, Manager)",
       ],
-      action: 'Call Now'
+      action: "Call Now",
     },
     {
       icon: <Mail className="w-5 h-5" />,
-      title: 'Email Support',
-      details: ['razzaqautomotives.vij@gmail.com', 'Quick response within 4 hours'],
-      action: 'Send Email'
-    }
+      title: "Email Support",
+      details: ["razzaqautomotives.vij@gmail.com", "Quick response within 4 hours"],
+      action: "Send Email",
+    },
   ];
 
   return (
@@ -412,8 +457,8 @@ const ContactSection = () => {
           </h2>
           <div className="industrial-line w-24 mx-auto mb-6" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Ready to experience five decades of automotive excellence? Get in touch with our team{' '}
-            for expert consultation and premium heavy vehicle solutions.
+            Ready to experience five decades of automotive excellence? Get in touch
+            with our team for expert consultation and premium heavy vehicle solutions.
           </p>
         </motion.div>
 
@@ -430,7 +475,7 @@ const ContactSection = () => {
                 Send us a Message
               </h3>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -522,7 +567,7 @@ const ContactSection = () => {
                 >
                   <div className="flex items-center">
                     <Send className="w-5 h-5 mr-2" />
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </div>
                 </Button>
               </form>
@@ -546,17 +591,15 @@ const ContactSection = () => {
               >
                 <div className="flex items-start space-x-4">
                   <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-primary-foreground">
-                      {detail.icon}
-                    </span>
+                    <span className="text-primary-foreground">{detail.icon}</span>
                   </div>
                   <div className="flex-1">
                     <h4 className="font-heading font-semibold mb-2 group-hover:text-primary transition-colors">
                       {detail.title}
                     </h4>
                     <div className="space-y-1">
-                      {detail.details.map((line, lineIndex) => (
-                        <p key={lineIndex} className="text-sm text-muted-foreground">
+                      {detail.details.map((line, i) => (
+                        <p key={i} className="text-sm text-muted-foreground">
                           {line}
                         </p>
                       ))}
@@ -576,16 +619,12 @@ const ContactSection = () => {
           className="text-center mb-16"
         >
           <Button
-            onClick={() => window.open('https://g.page/r/CVo8voo1GVplEBM/review', '_blank')}
+            onClick={() => window.open("https://g.page/r/CVo8voo1GVplEBM/review", "_blank")}
             className="btn-accent px-8 py-4 text-sm font-medium group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center justify-center">
-              <svg
-                className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
+              <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -623,8 +662,8 @@ const ContactSection = () => {
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.316334494759!2d80.6480903!3d16.5087592!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35ef65006138db%3A0x3a3cd9089c9e9848!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1693929660000!5m2!1sen!2sin"
               width="100%"
               height="100%"
-              style={{ border: 0, filter: 'invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1)' }}
-              allowFullScreen={true}
+              style={{ border: 0, filter: "invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1)" }}
+              allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Razzaq Automotives - Auto Nagar, Vijayawada"
@@ -637,3 +676,4 @@ const ContactSection = () => {
 };
 
 export default ContactSection;
+
