@@ -109,9 +109,9 @@ const LegacySection = () => {
         >
           {[
             { number: '50+', label: 'Years of Experience' },
-            { number: '500+', label: 'Heavy Vehicles Serviced' },
-            { number: '1000+', label: 'Clients Served' },
-            { number: '24/7', label: 'Support Available' }
+            { number: '100+', label: 'Businesses & Fleets Served' },
+            { number: '1000s', label: 'Customers' },
+            { number: '3', label: 'Locations' }
           ].map((stat, index) => (
             <div key={index} className="text-center frosted-glass p-6 rounded-xl">
               <motion.div

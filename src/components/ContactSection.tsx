@@ -97,7 +97,7 @@ const ContactSection = () => {
                 Send us a Message
               </h3>
               
-              <form action="https://formspree.io/f/xkndgoek" method="POST" className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -181,11 +181,12 @@ const ContactSection = () => {
 
                 <Button
                   type="submit"
-                  className="btn-hero w-full py-6 text-lg"
+                  disabled={isSubmitting}
+                  className="btn-hero w-full py-6 text-lg disabled:opacity-50"
                 >
                   <div className="flex items-center">
                     <Send className="w-5 h-5 mr-2" />
-                    Send Message
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </div>
                 </Button>
               </form>
