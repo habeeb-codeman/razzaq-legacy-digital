@@ -158,12 +158,12 @@
 
   /* Text Styles */
   .text-hero {
-    @apply text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight;
+    @apply text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight;
     font-family: 'Space Grotesk', sans-serif;
   }
 
   .text-section-title {
-    @apply text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight;
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight;
     font-family: 'Space Grotesk', sans-serif;
   }
 

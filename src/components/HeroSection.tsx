@@ -50,8 +50,8 @@ const HeroSection = () => {
           duration: 0.8,
           delay: 0.2
         }} className="text-hero mb-6 leading-tight">
-            <span className="block">Honoring Our Heritage.</span>
-            <span className="block text-accent-glow">Advancing Your Fleet.</span>
+            <span className="block">Engineering Excellence.</span>
+            <span className="block text-accent-glow">Powering Your Success.</span>
           </motion.h1>
 
           <motion.p initial={{

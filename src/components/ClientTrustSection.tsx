@@ -115,7 +115,25 @@ const ClientTrustSection = () => {
         duration: 0.8,
         delay: 0.8
       }} className="grid md:grid-cols-3 gap-8">
-          {trustMetrics.map((metric, index) => {})}
+          {trustMetrics.map((metric, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
+              transition={{ duration: 0.6, delay: 1 + index * 0.15 }}
+              className="text-center frosted-glass"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg mx-auto mb-4">
+                <span className="text-primary-foreground">
+                  {metric.icon}
+                </span>
+              </div>
+              <div className="text-3xl font-heading font-bold text-accent mb-2">
+                {metric.value}
+              </div>
+              <p className="text-muted-foreground">{metric.label}</p>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* Partnership Call-to-Action */}

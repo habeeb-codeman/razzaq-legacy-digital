@@ -97,7 +97,7 @@ const ContactSection = () => {
                 Send us a Message
               </h3>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form action="https://formspree.io/f/xkndgoek" method="POST" className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -181,20 +181,12 @@ const ContactSection = () => {
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
                   className="btn-hero w-full py-6 text-lg"
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2" />
-                      Sending Message...
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
-                    </div>
-                  )}
+                  <div className="flex items-center">
+                    <Send className="w-5 h-5 mr-2" />
+                    Send Message
+                  </div>
                 </Button>
               </form>
             </div>
@@ -247,7 +239,7 @@ const ContactSection = () => {
           className="text-center mb-16"
         >
           <Button
-            onClick={() => window.open('https://shorturl.at/oGASG', '_blank')}
+            onClick={() => window.open('https://g.page/r/CVo8voo1GVplEBM/review', '_blank')}
             className="btn-accent px-8 py-4 text-sm font-medium group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -285,14 +277,14 @@ const ContactSection = () => {
         >
           <div className="h-96 w-full">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3825.3742553876!2d80.62042!3d16.506247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d4c93%3A0x65965501d5bc3c4a!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1703123456789!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3825.419016847346!2d80.61823507532998!3d16.505406484132817!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d4c93%3A0x65965501d5bc3c4a!2sRazzaq%20Automotives!5e0!3m2!1sen!2sin!4v1732567890123!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0, filter: 'invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1)' }}
               allowFullScreen={true}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Razzaq Automotives Location"
+              title="Razzaq Automotives - Auto Nagar, Vijayawada"
             />
           </div>
         </motion.div>
