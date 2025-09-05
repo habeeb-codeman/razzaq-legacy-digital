@@ -184,7 +184,6 @@
 
 
 
-
 import React from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
@@ -425,7 +424,8 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} Razzaq Automotives. All rights reserved.
           </p>
 
-          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 text-sm">
+          {/* Aligned buttons — horizontal on md+ screens, stacked on small screens */}
+          <div className="flex items-center gap-6">
             <a
               href="/privacy"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -438,12 +438,6 @@ const Footer: React.FC = () => {
             >
               Terms of Service
             </a>
-            <a
-{/*               href={`mailto:${EMAIL}`} */}
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              {EMAIL}
-            </a>
           </div>
         </motion.div>
       </div>
@@ -452,3 +446,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+
