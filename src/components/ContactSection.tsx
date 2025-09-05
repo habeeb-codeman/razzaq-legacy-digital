@@ -336,6 +336,15 @@ const openExternal = (url: string) => {
   if (w) w.opener = null;
 };
 
+const isEmail = (text: string) => /\S+@\S+\.\S+/.test(text);
+const looksLikePhone = (text: string) => /(\+?\d[\d\s().-]{4,}\d)/.test(text);
+const phoneHref = (text: string) => {
+  // Strip everything except digits and leading plus
+  const plus = text.trim().startsWith("+") ? "+" : "";
+  const digits = text.replace(/[^\d]/g, "");
+  return `${plus}${digits}`.length ? `tel:${plus}${digits}` : undefined;
+};
+
 const ContactSection: React.FC = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const { toast } = useToast();
@@ -348,6 +357,24 @@ const ContactSection: React.FC = () => {
     phone: "",
     message: "",
   });
+
+  const contactDetails = [
+    {
+      icon: <Phone className="w-5 h-5" />,
+      title: "Call Us Directly",
+      details: [
+        "+91 888-567-3388 (Mr. Abdul Raqeeb)",
+        "+91 905-297-2421 (Mr. Abdul Aleem, Manager)",
+      ],
+      action: "Call Now",
+    },
+    {
+      icon: <Mail className="w-5 h-5" />,
+      title: "Email Support",
+      details: ["razzaqautomotives.vij@gmail.com", "Quick response within 4 hours"],
+      action: "Send Email",
+    },
+  ];
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -367,7 +394,7 @@ const ContactSection: React.FC = () => {
       payload.append("email", formData.email || "");
       payload.append("phone", formData.phone || "");
       payload.append("message", formData.message || "");
-      payload.append("_captcha", "false");
+      payload.append("_captcha", "false"); // disable FormSubmit captcha prompt
 
       const res = await fetch(FORM_SUBMIT_AJAX_URL, {
         method: "POST",
@@ -383,7 +410,7 @@ const ContactSection: React.FC = () => {
           const json = await res.json();
           if (json && json.message) errText = json.message;
         } catch {
-          // ignore
+          // ignore parse error
         }
         throw new Error(errText);
       }
@@ -414,24 +441,6 @@ const ContactSection: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
-  const contactDetails = [
-    {
-      icon: <Phone className="w-5 h-5" />,
-      title: "Call Us Directly",
-      details: [
-        "+91 888-567-3388 (Mr. Abdul Raqeeb)",
-        "+91 905-297-2421 (Mr. Abdul Aleem, Manager)",
-      ],
-      action: "Call Now",
-    },
-    {
-      icon: <Mail className="w-5 h-5" />,
-      title: "Email Support",
-      details: ["razzaqautomotives.vij@gmail.com", "Quick response within 4 hours"],
-      action: "Send Email",
-    },
-  ];
 
   return (
     <section id="contact" className="py-24 bg-card/10">
@@ -556,6 +565,7 @@ const ContactSection: React.FC = () => {
                   type="submit"
                   disabled={isSubmitting}
                   className="btn-hero w-full py-6 text-lg disabled:opacity-50"
+                  aria-label="Send message"
                 >
                   <div className="flex items-center">
                     <Send className="w-5 h-5 mr-2" />
@@ -590,11 +600,41 @@ const ContactSection: React.FC = () => {
                       {detail.title}
                     </h4>
                     <div className="space-y-1">
-                      {detail.details.map((line, i) => (
-                        <p key={i} className="text-sm text-muted-foreground">
-                          {line}
-                        </p>
-                      ))}
+                      {detail.details.map((line, i) => {
+                        if (isEmail(line)) {
+                          return (
+                            <p key={i} className="text-sm text-muted-foreground">
+                              <a
+                                href={`mailto:${line.trim()}`}
+                                className="hover:text-primary transition-colors underline-offset-2"
+                              >
+                                {line}
+                              </a>
+                            </p>
+                          );
+                        } else if (looksLikePhone(line)) {
+                          const href = phoneHref(line);
+                          return (
+                            <p key={i} className="text-sm text-muted-foreground">
+                              {href ? (
+                                <a
+                                  href={href}
+                                  className="hover:text-primary transition-colors"
+                                >
+                                  {line}
+                                </a>
+                              ) : (
+                                line
+                              )}
+                            </p>
+                          );
+                        }
+                        return (
+                          <p key={i} className="text-sm text-muted-foreground">
+                            {line}
+                          </p>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -610,7 +650,7 @@ const ContactSection: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center justify-center gap-4">
+          <div className="inline-flex items-center justify-center gap-4 flex-wrap">
             {/* Review Button */}
             <Button
               onClick={() => openExternal(REVIEW_URL)}
@@ -632,7 +672,7 @@ const ContactSection: React.FC = () => {
             {/* Visit Button */}
             <Button
               onClick={() => {
-                // Try to open the maps app link first; fallback to direct maps route for web
+                // try mobile shortlink first, fallback to direct google maps link
                 try {
                   openExternal(MAP_APP_LINK);
                 } catch {
@@ -643,7 +683,6 @@ const ContactSection: React.FC = () => {
               className="btn-glass px-6 py-4 text-sm font-medium group relative overflow-hidden"
             >
               <div className="relative flex items-center justify-center">
-                {/* simple location icon (reuse MapPin visually if desired) */}
                 <svg className="w-5 h-5 mr-2 transform group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
                 </svg>
@@ -694,7 +733,6 @@ const ContactSection: React.FC = () => {
 };
 
 export default ContactSection;
-
 
 
 
