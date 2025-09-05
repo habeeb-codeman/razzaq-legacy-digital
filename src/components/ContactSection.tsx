@@ -339,6 +339,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock, Send, HardHat, Building, Award, Star } from 'lucide-react';
 
 // Main App Component
@@ -512,15 +513,19 @@ const AnimatedCounter = ({ value, label }) => {
             if (start === end) return;
             
             const duration = 2000;
-            const incrementTime = (duration / end);
+            // Avoid division by zero
+            const incrementTime = end > 0 ? (duration / end) : 0;
             
-            const timer = setInterval(() => {
-                start += 1;
-                setCount(start);
-                if (start === end) clearInterval(timer);
-            }, incrementTime);
-
-            return () => clearInterval(timer);
+            if (incrementTime > 0) {
+                const timer = setInterval(() => {
+                    start += 1;
+                    setCount(start);
+                    if (start >= end) clearInterval(timer);
+                }, incrementTime);
+                 return () => clearInterval(timer);
+            } else {
+                 setCount(end);
+            }
         }
     }, [inView, value]);
 
@@ -802,3 +807,4 @@ const Footer = () => {
 };
 
 export default App;
+
