@@ -110,7 +110,7 @@ const ContactSection = () => {
                       required
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="bg-background/50 border-border/50 focus:border-primary"
+                      className="w-full"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -124,7 +124,7 @@ const ContactSection = () => {
                       type="text"
                       value={formData.company}
                       onChange={handleInputChange}
-                      className="bg-background/50 border-border/50 focus:border-primary"
+                      className="w-full"
                       placeholder="Your company name (optional)"
                     />
                   </div>
@@ -142,7 +142,7 @@ const ContactSection = () => {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-background/50 border-border/50 focus:border-primary"
+                      className="w-full"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -157,7 +157,7 @@ const ContactSection = () => {
                       required
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="bg-background/50 border-border/50 focus:border-primary"
+                      className="w-full"
                       placeholder="+91 XXXXX-XXXXX"
                     />
                   </div>
@@ -174,7 +174,7 @@ const ContactSection = () => {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={5}
-                    className="bg-background/50 border-border/50 focus:border-primary resize-none"
+                    className="w-full resize-none"
                     placeholder="Tell us about your requirements, fleet details, or any questions you have..."
                   />
                 </div>
