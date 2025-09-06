@@ -78,7 +78,6 @@ export default function GalleryPage(): JSX.Element {
             if (!mounted) return;
 
             if (Array.isArray(data.images)) {
-              // API returns { images: [ { filename, description? } ] } or { images: [ "file.jpg", ... ] }
               const list: GalleryImage[] = data.images.map((item: any) => {
                 if (typeof item === "string") {
                   return {
@@ -111,10 +110,9 @@ export default function GalleryPage(): JSX.Element {
           .finally(() => {
             if (mounted) setLoading(false);
           });
-      });
-    
+      })
       .finally(() => {
-        if (mounted) setLoading(false);  // ✅ this line is missing in your code
+        if (mounted) setLoading(false);
       });
 
     return () => {
@@ -342,3 +340,4 @@ export default function GalleryPage(): JSX.Element {
     </>
   );
 }
+
