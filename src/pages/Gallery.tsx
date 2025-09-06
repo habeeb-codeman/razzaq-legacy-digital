@@ -6,13 +6,24 @@ import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+/**
+ * Resilient Gallery page:
+ * - Tries to load public/images/gallery/gallery.json first (static manifest)
+ * - Falls back to /api/gallery if manifest not found
+ * - Shows filename (no extension) as top overlay on hover and description (from manifest/API) in bottom overlay
+ *
+ * To guarantee successful deploys on Vercel: add a static manifest at:
+ *   public/images/gallery/gallery.json
+ */
+
 type GalleryImage = {
   filename: string;
   src: string;
   title: string;       // prettified filename (without extension)
-  description?: string; // from CSV (may be empty)
+  description?: string;
 };
 
+const MANIFEST_PATH = "/images/gallery/gallery.json";
 const API_ENDPOINT = "/api/gallery";
 
 function prettifyName(filename: string) {
@@ -29,36 +40,74 @@ export default function GalleryPage(): JSX.Element {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetch(API_ENDPOINT)
+
+    // Try static manifest first
+    fetch(MANIFEST_PATH)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`API returned ${res.status}`);
-        }
+        if (!res.ok) throw new Error("Manifest not found");
         return res.json();
       })
       .then((data) => {
         if (!mounted) return;
-        if (Array.isArray(data.images)) {
-          const list = data.images.map((item: any) => ({
-            filename: item.filename,
-            src: `/images/gallery/${item.filename}`,
-            title: prettifyName(item.filename),
-            description: item.description || "",
-          }));
+        if (Array.isArray(data)) {
+          const list: GalleryImage[] = data
+            .filter((it: any) => it && it.filename)
+            .map((it: any) => ({
+              filename: it.filename,
+              src: `/images/gallery/${it.filename}`,
+              title: prettifyName(it.filename),
+              description: it.description || "",
+            }));
           setImages(list);
           setError(null);
         } else {
-          setImages([]);
-          setError("No images returned from API.");
+          throw new Error("Invalid manifest format (expected array)");
         }
       })
-      .catch((err) => {
-        console.error("Failed to load gallery:", err);
-        if (mounted) setError(String(err?.message || err));
-        setImages([]);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
+      .catch(() => {
+        // manifest failed — fallback to API
+        fetch(API_ENDPOINT)
+          .then((res) => {
+            if (!res.ok) throw new Error(`API returned ${res.status}`);
+            return res.json();
+          })
+          .then((data) => {
+            if (!mounted) return;
+            if (Array.isArray(data.images)) {
+              // API returns { images: [ { filename, description? } ] } or { images: [ "file.jpg", ... ] }
+              const list = data.images.map((item: any) => {
+                if (typeof item === "string") {
+                  return {
+                    filename: item,
+                    src: `/images/gallery/${item}`,
+                    title: prettifyName(item),
+                    description: "",
+                  };
+                } else {
+                  const filename = item.filename || item.name;
+                  return {
+                    filename,
+                    src: `/images/gallery/${filename}`,
+                    title: prettifyName(filename),
+                    description: item.description || "",
+                  };
+                }
+              });
+              setImages(list);
+              setError(null);
+            } else {
+              throw new Error("API returned unexpected structure");
+            }
+          })
+          .catch((err) => {
+            console.error("Gallery load error:", err);
+            if (mounted) setError(String(err?.message || err));
+            setImages([]);
+          })
+          .finally(() => {
+            if (mounted) setLoading(false);
+          });
+        // end API fetch
       });
 
     return () => {
@@ -107,7 +156,7 @@ export default function GalleryPage(): JSX.Element {
             >
               <h1 className="heading-primary mb-6">Our Gallery</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hover an image to see a title and description (if provided).
+                Hover an image to see its title. Click to open viewer.
               </p>
             </motion.div>
           </section>
@@ -152,13 +201,11 @@ export default function GalleryPage(): JSX.Element {
                       </div>
                     </div>
 
-                    {/* Bottom overlay: description from CSV (or fallback to title) */}
+                    {/* Bottom overlay: description */}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
                         <h3 className="text-lg font-semibold text-foreground mb-1">{img.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {img.description && img.description.length > 0 ? img.description : img.title}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{img.description && img.description.length > 0 ? img.description : img.title}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -229,11 +276,7 @@ export default function GalleryPage(): JSX.Element {
                   <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-semibold">{images[lightboxIndex].title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {images[lightboxIndex].description && images[lightboxIndex].description.length > 0
-                          ? images[lightboxIndex].description
-                          : images[lightboxIndex].title}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">{images[lightboxIndex].description && images[lightboxIndex].description.length > 0 ? images[lightboxIndex].description : images[lightboxIndex].title}</p>
                     </div>
 
                     <div className="flex items-center gap-3">
