@@ -112,6 +112,10 @@ export default function GalleryPage(): JSX.Element {
             if (mounted) setLoading(false);
           });
       });
+    
+      .finally(() => {
+        if (mounted) setLoading(false);  // ✅ this line is missing in your code
+      });
 
     return () => {
       mounted = false;
