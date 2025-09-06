@@ -152,14 +152,24 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import razzaqLogo from "@/assets/razzaq-logo.png";
+
+const navItems = [
+  { label: "Home", id: "hero", isRoute: false },
+  { label: "Legacy", id: "legacy", isRoute: false },
+  { label: "Capabilities", id: "capabilities", isRoute: false },
+  { label: "Partnerships", id: "partnerships", isRoute: false },
+  { label: "Advantage", id: "advantage", isRoute: false },
+  { label: "Gallery", id: "/gallery", isRoute: true },
+  { label: "Contact", id: "contact", isRoute: false },
+];
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -171,34 +181,28 @@ const Navigation = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
-      setIsOpen(false);
     }
+    setIsOpen(false);
   };
 
-  const handleNavClick = (id: string, isRoute: boolean) => {
-    if (isRoute) {
+  const handleNavClick = (item: typeof navItems[0]) => {
+    if (item.isRoute) {
+      // Route navigation (e.g., Gallery)
       setIsOpen(false);
-      navigate(id); // Navigate to route
+      navigate(item.id);
     } else {
+      // Anchor navigation
       if (location.pathname === "/") {
-        scrollToSection(id); // Already on home page
+        // Same page scroll
+        scrollToSection(item.id);
       } else {
-        // Navigate to home and scroll after render
-        navigate("/", { state: { scrollTo: id } });
+        // Navigate to home first then scroll
+        navigate("/", { state: { scrollTo: item.id } });
         setIsOpen(false);
+        setTimeout(() => scrollToSection(item.id), 350); // wait for DOM to mount
       }
     }
   };
-
-  const navItems = [
-    { label: "Home", id: "hero", isRoute: false },
-    { label: "Legacy", id: "legacy", isRoute: false },
-    { label: "Capabilities", id: "capabilities", isRoute: false },
-    { label: "Partnerships", id: "partnerships", isRoute: false },
-    { label: "Advantage", id: "advantage", isRoute: false },
-    { label: "Gallery", id: "/gallery", isRoute: true },
-    { label: "Contact", id: "contact", isRoute: false },
-  ];
 
   return (
     <motion.nav
@@ -238,13 +242,17 @@ const Navigation = () => {
           <div className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) =>
               item.isRoute ? (
-                <Link key={item.id} to={item.id} className="nav-link font-medium">
+                <Link
+                  key={item.id}
+                  to={item.id}
+                  className="nav-link font-medium"
+                >
                   {item.label}
                 </Link>
               ) : (
                 <button
                   key={item.id}
-                  onClick={() => handleNavClick(item.id, item.isRoute)}
+                  onClick={() => handleNavClick(item)}
                   className="nav-link font-medium"
                 >
                   {item.label}
@@ -252,7 +260,7 @@ const Navigation = () => {
               )
             )}
             <Button
-              onClick={() => handleNavClick("contact", false)}
+              onClick={() => handleNavClick({ label: "Get Quote", id: "contact", isRoute: false })}
               variant="default"
               className="btn-hero"
             >
@@ -293,7 +301,7 @@ const Navigation = () => {
                 ) : (
                   <button
                     key={item.id}
-                    onClick={() => handleNavClick(item.id, item.isRoute)}
+                    onClick={() => handleNavClick(item)}
                     className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors"
                   >
                     {item.label}
@@ -301,7 +309,7 @@ const Navigation = () => {
                 )
               )}
               <Button
-                onClick={() => handleNavClick("contact", false)}
+                onClick={() => handleNavClick({ label: "Get Quote", id: "contact", isRoute: false })}
                 className="btn-hero mx-4 mt-2"
               >
                 Get Quote
