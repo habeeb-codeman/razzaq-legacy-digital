@@ -7,19 +7,17 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
 type GalleryImage = {
-  filename: string; // e.g. "truck-1.jpg"
-  src: string;      // public url: /images/gallery/truck-1.jpg
-  alt: string;      // prettified filename
-  title: string;    // filename without extension, prettified
+  filename: string;
+  src: string;
+  title: string;       // prettified filename (without extension)
+  description?: string; // from CSV (may be empty)
 };
 
 const API_ENDPOINT = "/api/gallery";
 
 function prettifyName(filename: string) {
   const base = filename.replace(/\.[^/.]+$/, "");
-  return base
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  return base.replace(/[_-]+/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
 export default function GalleryPage(): JSX.Element {
@@ -33,23 +31,25 @@ export default function GalleryPage(): JSX.Element {
     setLoading(true);
     fetch(API_ENDPOINT)
       .then((res) => {
-        if (!res.ok) throw new Error(`API returned ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`API returned ${res.status}`);
+        }
         return res.json();
       })
       .then((data) => {
         if (!mounted) return;
         if (Array.isArray(data.images)) {
-          const list: GalleryImage[] = data.images.map((fn: string) => ({
-            filename: fn,
-            src: `/images/gallery/${fn}`,
-            alt: prettifyName(fn),
-            title: prettifyName(fn),
+          const list = data.images.map((item: any) => ({
+            filename: item.filename,
+            src: `/images/gallery/${item.filename}`,
+            title: prettifyName(item.filename),
+            description: item.description || "",
           }));
           setImages(list);
           setError(null);
         } else {
           setImages([]);
-          setError("No images found.");
+          setError("No images returned from API.");
         }
       })
       .catch((err) => {
@@ -107,7 +107,7 @@ export default function GalleryPage(): JSX.Element {
             >
               <h1 className="heading-primary mb-6">Our Gallery</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hover an image to see its name. Click to open viewer.
+                Hover an image to see a title and description (if provided).
               </p>
             </motion.div>
           </section>
@@ -139,24 +139,26 @@ export default function GalleryPage(): JSX.Element {
                     <div className="aspect-[4/3] overflow-hidden">
                       <img
                         src={img.src}
-                        alt={img.alt}
+                        alt={img.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
                     </div>
 
-                    {/* Top overlay: show filename/title on hover */}
+                    {/* Top overlay: filename/title on hover */}
                     <div className="absolute left-0 right-0 top-0 p-3 pointer-events-none">
                       <div className="bg-gradient-to-b from-black/60 to-transparent rounded-b-md px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
                         <p className="text-xs text-white/95 font-medium truncate">{img.title}</p>
                       </div>
                     </div>
 
-                    {/* Bottom overlay: larger caption when hover */}
+                    {/* Bottom overlay: description from CSV (or fallback to title) */}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
                         <h3 className="text-lg font-semibold text-foreground mb-1">{img.title}</h3>
-                        <p className="text-sm text-muted-foreground">{img.alt}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {img.description && img.description.length > 0 ? img.description : img.title}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -188,7 +190,7 @@ export default function GalleryPage(): JSX.Element {
                   <div className="relative">
                     <img
                       src={images[lightboxIndex].src}
-                      alt={images[lightboxIndex].alt}
+                      alt={images[lightboxIndex].title}
                       className="w-full h-[60vh] md:h-[80vh] object-contain bg-black"
                       loading="eager"
                     />
@@ -227,7 +229,11 @@ export default function GalleryPage(): JSX.Element {
                   <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-semibold">{images[lightboxIndex].title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{images[lightboxIndex].alt}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {images[lightboxIndex].description && images[lightboxIndex].description.length > 0
+                          ? images[lightboxIndex].description
+                          : images[lightboxIndex].title}
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-3">
