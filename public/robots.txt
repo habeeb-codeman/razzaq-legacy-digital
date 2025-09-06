@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemaps
+Sitemap: https://razzaqautomotives.com/sitemap.xml
+
+# Host
+Host: https://razzaqautomotives.com
