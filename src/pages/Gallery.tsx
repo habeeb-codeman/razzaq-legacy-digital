@@ -1,108 +1,103 @@
+// src/pages/Gallery.tsx
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
-
-/**
- * Gallery page (client component)
- *
- * IMPORTANT:
- * - Put your gallery-only images in the public folder:
- *   /public/images/gallery/gallery-1.jpg
- *   /public/images/gallery/gallery-2.jpg
- *   ...
- *
- * - Using public paths avoids build-time import errors on Vercel.
- * - If you prefer next/image optimization, tell me and I'll provide that version.
- */
 
 type GalleryImage = {
-  src: string; // public path (e.g. /images/gallery/gallery-1.jpg)
-  alt: string;
-  title?: string;
-  caption?: string;
+  filename: string; // e.g. "truck-1.jpg"
+  src: string;      // public url: /images/gallery/truck-1.jpg
+  alt: string;      // prettified filename
+  title: string;    // filename without extension, prettified
 };
 
-const galleryImages: GalleryImage[] = [
-  {
-    src: "/images/gallery/gallery-1.jpg",
-    alt: "Premium truck body - side profile",
-    title: "Premium Truck Bodies",
-    caption: "Precision-built truck bodies for heavy-duty performance.",
-  },
-  {
-    src: "/images/gallery/gallery-2.jpg",
-    alt: "Cinematic commercial vehicle in workshop",
-    title: "Commercial Vehicle Solutions",
-    caption: "End-to-end commercial vehicle solutions for fleet owners.",
-  },
-  {
-    src: "/images/gallery/gallery-3.jpg",
-    alt: "Truck cabin interior showcasing dashboard and seats",
-    title: "Cabin Interior Systems",
-    caption: "Comfort-driven cabin interiors with ergonomic design.",
-  },
-  {
-    src: "/images/gallery/gallery-4.jpg",
-    alt: "Well-organized warehouse with parts and racks",
-    title: "State-of-the-Art Facility",
-    caption: "Modern warehouse and parts handling for quick turnarounds.",
-  },
-  {
-    src: "/images/gallery/gallery-5.jpg",
-    alt: "Close-up of vehicle electrical system components",
-    title: "Electrical Systems",
-    caption: "Quality electrical systems tested for durability.",
-  },
-  {
-    src: "/images/gallery/gallery-6.jpg",
-    alt: "Industrial components organized for assembly",
-    title: "Quality Components",
-    caption: "High-grade components that meet OEM standards.",
-  },
-];
+const API_ENDPOINT = "/api/gallery";
 
-const Gallery: React.FC = () => {
+function prettifyName(filename: string) {
+  const base = filename.replace(/\.[^/.]+$/, "");
+  return base
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+export default function GalleryPage(): JSX.Element {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    fetch(API_ENDPOINT)
+      .then((res) => {
+        if (!res.ok) throw new Error(`API returned ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!mounted) return;
+        if (Array.isArray(data.images)) {
+          const list: GalleryImage[] = data.images.map((fn: string) => ({
+            filename: fn,
+            src: `/images/gallery/${fn}`,
+            alt: prettifyName(fn),
+            title: prettifyName(fn),
+          }));
+          setImages(list);
+          setError(null);
+        } else {
+          setImages([]);
+          setError("No images found.");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load gallery:", err);
+        if (mounted) setError(String(err?.message || err));
+        setImages([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
 
   const showPrev = useCallback(() => {
     setLightboxIndex((prev) =>
-      prev === null ? 0 : (prev - 1 + galleryImages.length) % galleryImages.length
+      prev === null ? 0 : (prev - 1 + images.length) % images.length
     );
-  }, []);
+  }, [images.length]);
 
   const showNext = useCallback(() => {
     setLightboxIndex((prev) =>
-      prev === null ? 0 : (prev + 1) % galleryImages.length
+      prev === null ? 0 : (prev + 1) % images.length
     );
-  }, []);
+  }, [images.length]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowLeft") showPrev();
       if (e.key === "ArrowRight") showNext();
     };
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxIndex, showPrev, showNext]);
 
   return (
     <>
-      {/* If you have an SEO component you can re-add it here */}
       <div className="min-h-screen bg-background">
         <Navigation />
 
         <main className="pt-24 pb-16">
-          {/* Hero */}
           <section className="container mx-auto px-6 py-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -112,59 +107,70 @@ const Gallery: React.FC = () => {
             >
               <h1 className="heading-primary mb-6">Our Gallery</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Discover the quality and craftsmanship that has made Razzaq
-                Automotives Vijayawada’s premier choice for heavy vehicle
-                solutions since 1976.
+                Hover an image to see its name. Click to open viewer.
               </p>
             </motion.div>
           </section>
 
-          {/* Gallery Grid */}
           <section className="container mx-auto px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {galleryImages.map((image, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.45, delay: index * 0.06 }}
-                  className="group relative overflow-hidden rounded-lg bg-card border border-border/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
-                  onClick={() => openLightbox(index)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") openLightbox(index);
-                  }}
-                >
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
-                        {image.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">{image.alt}</p>
+            {loading ? (
+              <div className="text-center py-20 text-muted-foreground">Loading gallery…</div>
+            ) : error ? (
+              <div className="text-center py-20 text-destructive">Error: {error}</div>
+            ) : images.length === 0 ? (
+              <div className="text-center py-20 text-muted-foreground">No gallery images found.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {images.map((img, i) => (
+                  <motion.div
+                    key={img.filename}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.45, delay: i * 0.04 }}
+                    className="group relative overflow-hidden rounded-lg bg-card border border-border/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+                    onClick={() => openLightbox(i)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") openLightbox(i);
+                    }}
+                  >
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+
+                    {/* Top overlay: show filename/title on hover */}
+                    <div className="absolute left-0 right-0 top-0 p-3 pointer-events-none">
+                      <div className="bg-gradient-to-b from-black/60 to-transparent rounded-b-md px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
+                        <p className="text-xs text-white/95 font-medium truncate">{img.title}</p>
+                      </div>
+                    </div>
+
+                    {/* Bottom overlay: larger caption when hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
+                        <h3 className="text-lg font-semibold text-foreground mb-1">{img.title}</h3>
+                        <p className="text-sm text-muted-foreground">{img.alt}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </section>
 
-          {/* Lightbox Modal */}
-          {lightboxIndex !== null && (
+          {/* Lightbox */}
+          {lightboxIndex !== null && images[lightboxIndex] && (
             <div
               aria-modal="true"
               role="dialog"
-              aria-label={`${galleryImages[lightboxIndex].title} — image viewer`}
+              aria-label={`${images[lightboxIndex].title} — image viewer`}
               className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
             >
               <div
@@ -179,16 +185,14 @@ const Gallery: React.FC = () => {
                   transition={{ duration: 0.25 }}
                   className="bg-background rounded-lg overflow-hidden shadow-2xl"
                 >
-                  {/* Image */}
                   <div className="relative">
                     <img
-                      src={galleryImages[lightboxIndex].src}
-                      alt={galleryImages[lightboxIndex].alt}
+                      src={images[lightboxIndex].src}
+                      alt={images[lightboxIndex].alt}
                       className="w-full h-[60vh] md:h-[80vh] object-contain bg-black"
                       loading="eager"
                     />
 
-                    {/* Close */}
                     <button
                       onClick={closeLightbox}
                       aria-label="Close image viewer"
@@ -197,11 +201,10 @@ const Gallery: React.FC = () => {
                       ✕
                     </button>
 
-                    {/* Prev / Next */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        showPrev();
+                        setLightboxIndex((p) => (p === null ? 0 : (p - 1 + images.length) % images.length));
                       }}
                       aria-label="Previous image"
                       className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
@@ -212,7 +215,7 @@ const Gallery: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        showNext();
+                        setLightboxIndex((p) => (p === null ? 0 : (p + 1) % images.length));
                       }}
                       aria-label="Next image"
                       className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
@@ -221,22 +224,15 @@ const Gallery: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Caption + actions */}
                   <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-semibold">
-                        {galleryImages[lightboxIndex].title}
-                      </h3>
-                      {galleryImages[lightboxIndex].caption && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {galleryImages[lightboxIndex].caption}
-                        </p>
-                      )}
+                      <h3 className="text-lg font-semibold">{images[lightboxIndex].title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{images[lightboxIndex].alt}</p>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <a
-                        href={galleryImages[lightboxIndex].src}
+                        href={images[lightboxIndex].src}
                         download
                         className="btn-outline-hero px-4 py-2 text-sm rounded-md"
                         aria-label="Download image"
@@ -245,7 +241,7 @@ const Gallery: React.FC = () => {
                       </a>
                       <button
                         onClick={() => {
-                          const w = window.open(galleryImages[lightboxIndex].src, "_blank");
+                          const w = window.open(images[lightboxIndex].src, "_blank");
                           if (w) w.opener = null;
                         }}
                         className="btn-glass px-4 py-2 text-sm rounded-md"
@@ -265,6 +261,4 @@ const Gallery: React.FC = () => {
       </div>
     </>
   );
-};
-
-export default Gallery;
+}
