@@ -1,24 +1,25 @@
-// src/pages/Gallery.tsx
-import SEO from "@/components/SEO";
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import React, { useEffect, useState, useCallback } from "react";
 
-// ======= IMPORTANT =======
-// Place your gallery-only images in: src/assets/gallery/
-// Update the imports below if you use different filenames.
-// Only images imported here will appear in the gallery.
-import g1 from "@/assets/gallery/gallery-1.jpg";
-import g2 from "@/assets/gallery/gallery-2.jpg";
-import g3 from "@/assets/gallery/gallery-3.jpg";
-import g4 from "@/assets/gallery/gallery-4.jpg";
-import g5 from "@/assets/gallery/gallery-5.jpg";
-import g6 from "@/assets/gallery/gallery-6.jpg";
-// =========================
+/**
+ * Gallery page (client component)
+ *
+ * IMPORTANT:
+ * - Put your gallery-only images in the public folder:
+ *   /public/images/gallery/gallery-1.jpg
+ *   /public/images/gallery/gallery-2.jpg
+ *   ...
+ *
+ * - Using public paths avoids build-time import errors on Vercel.
+ * - If you prefer next/image optimization, tell me and I'll provide that version.
+ */
 
 type GalleryImage = {
-  src: string;
+  src: string; // public path (e.g. /images/gallery/gallery-1.jpg)
   alt: string;
   title?: string;
   caption?: string;
@@ -26,37 +27,37 @@ type GalleryImage = {
 
 const galleryImages: GalleryImage[] = [
   {
-    src: g1,
+    src: "/images/gallery/gallery-1.jpg",
     alt: "Premium truck body - side profile",
     title: "Premium Truck Bodies",
     caption: "Precision-built truck bodies for heavy-duty performance.",
   },
   {
-    src: g2,
+    src: "/images/gallery/gallery-2.jpg",
     alt: "Cinematic commercial vehicle in workshop",
     title: "Commercial Vehicle Solutions",
     caption: "End-to-end commercial vehicle solutions for fleet owners.",
   },
   {
-    src: g3,
+    src: "/images/gallery/gallery-3.jpg",
     alt: "Truck cabin interior showcasing dashboard and seats",
     title: "Cabin Interior Systems",
     caption: "Comfort-driven cabin interiors with ergonomic design.",
   },
   {
-    src: g4,
+    src: "/images/gallery/gallery-4.jpg",
     alt: "Well-organized warehouse with parts and racks",
     title: "State-of-the-Art Facility",
     caption: "Modern warehouse and parts handling for quick turnarounds.",
   },
   {
-    src: g5,
+    src: "/images/gallery/gallery-5.jpg",
     alt: "Close-up of vehicle electrical system components",
     title: "Electrical Systems",
     caption: "Quality electrical systems tested for durability.",
   },
   {
-    src: g6,
+    src: "/images/gallery/gallery-6.jpg",
     alt: "Industrial components organized for assembly",
     title: "Quality Components",
     caption: "High-grade components that meet OEM standards.",
@@ -96,12 +97,7 @@ const Gallery: React.FC = () => {
 
   return (
     <>
-      <SEO
-        title="Gallery | Razzaq Automotives"
-        description="Explore our gallery showcasing premium heavy vehicle solutions, truck body parts, and state-of-the-art automotive facilities. See the quality that has made us Vijayawada's trusted choice since 1976."
-        keywords="truck body gallery, automotive parts showcase, heavy vehicle solutions, Razzaq Automotives gallery, truck manufacturing photos"
-      />
-
+      {/* If you have an SEO component you can re-add it here */}
       <div className="min-h-screen bg-background">
         <Navigation />
 
@@ -249,7 +245,6 @@ const Gallery: React.FC = () => {
                       </a>
                       <button
                         onClick={() => {
-                          // open in new tab
                           const w = window.open(galleryImages[lightboxIndex].src, "_blank");
                           if (w) w.opener = null;
                         }}
