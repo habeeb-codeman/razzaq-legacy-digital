@@ -543,11 +543,11 @@ export default function GalleryPage(): JSX.Element {
                       />
                     </div>
 
-                    <div className="p-4 bg-card-foreground text-foreground">
+                    <div className="p-4 bg-card-foreground text-foreground flex flex-col items-center text-center">
                       <h3 className="text-xl font-semibold mb-1 truncate">
                         {img.product_name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         {img.description}
                       </p>
                     </div>
