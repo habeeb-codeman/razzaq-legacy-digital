@@ -378,7 +378,7 @@ type GalleryImage = {
 };
 
 const MANIFEST_PATH = "/images/gallery/gallery.json";
-const API_ENDPOINT = "/api/gallery";
+const API_ENDPOINT = "/api/product";
 
 export default function GalleryPage(): JSX.Element {
   const [images, setImages] = useState<GalleryImage[]>([]);
