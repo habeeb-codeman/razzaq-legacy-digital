@@ -499,7 +499,7 @@ export default function GalleryPage(): JSX.Element {
             >
               <h1 className="heading-primary mb-6">Our Products</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hover on a product to see its name. Click to open a larger view with details.
+                Explore our range of high-quality automotive parts.
               </p>
             </motion.div>
           </section>
@@ -522,11 +522,11 @@ export default function GalleryPage(): JSX.Element {
                 {images.map((img, i) => (
                   <motion.div
                     key={img.filename}
-                    initial={{ opacity: 0, scale: 0.98 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.45, delay: i * 0.04 }}
-                    className="group relative overflow-hidden rounded-lg bg-card border border-border/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-card"
                     onClick={() => openLightbox(i)}
                     role="button"
                     tabIndex={0}
@@ -543,25 +543,13 @@ export default function GalleryPage(): JSX.Element {
                       />
                     </div>
 
-                    {/* Top overlay: product name on hover */}
-                    <div className="absolute left-0 right-0 top-0 p-3 pointer-events-none">
-                      <div className="bg-gradient-to-b from-black/60 to-transparent rounded-b-md px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
-                        <p className="text-xs text-white/95 font-medium truncate">
-                          {img.product_name}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bottom overlay: description */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
-                        <h3 className="text-lg font-semibold text-foreground mb-1">
-                          {img.product_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {img.description}
-                        </p>
-                      </div>
+                    <div className="p-4 bg-card-foreground text-foreground">
+                      <h3 className="text-xl font-semibold mb-1 truncate">
+                        {img.product_name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {img.description}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -575,32 +563,32 @@ export default function GalleryPage(): JSX.Element {
               aria-modal="true"
               role="dialog"
               aria-label={`${images[lightboxIndex].product_name} — image viewer`}
-              className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+              className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
             >
               <div
-                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                className="absolute inset-0"
                 onClick={closeLightbox}
               />
               <div className="relative max-w-6xl w-full mx-auto">
                 <motion.div
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-background rounded-lg overflow-hidden shadow-2xl"
+                  transition={{ duration: 0.3 }}
+                  className="bg-card rounded-lg overflow-hidden shadow-2xl"
                 >
                   <div className="relative">
                     <img
                       src={images[lightboxIndex].src}
                       alt={images[lightboxIndex].product_name}
-                      className="w-full h-[60vh] md:h-[80vh] object-contain bg-black"
+                      className="w-full h-[60vh] md:h-[80vh] object-contain"
                       loading="eager"
                     />
                     <button
                       onClick={closeLightbox}
                       aria-label="Close image viewer"
-                      className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-foreground rounded-md p-2"
+                      className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors duration-200"
                     >
-                      ✕
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                     <button
                       onClick={(e) => {
@@ -612,9 +600,9 @@ export default function GalleryPage(): JSX.Element {
                         );
                       }}
                       aria-label="Previous image"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors duration-200"
                     >
-                      ‹
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
                     <button
                       onClick={(e) => {
@@ -624,14 +612,14 @@ export default function GalleryPage(): JSX.Element {
                         );
                       }}
                       aria-label="Next image"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors duration-200"
                     >
-                      ›
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                   </div>
                   <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-semibold">
+                      <h3 className="text-xl font-bold">
                         {images[lightboxIndex].product_name}
                       </h3>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -642,7 +630,7 @@ export default function GalleryPage(): JSX.Element {
                       <a
                         href={images[lightboxIndex].src}
                         download
-                        className="btn-outline-hero px-4 py-2 text-sm rounded-md"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
                         aria-label="Download image"
                       >
                         Download
@@ -651,24 +639,12 @@ export default function GalleryPage(): JSX.Element {
                         href={`https://wa.me/918885673388?text=Hello, I would like to enquire about the product: ${images[lightboxIndex].product_name}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-glass px-4 py-2 text-sm rounded-md"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 gap-2"
                         aria-label="Send an enquiry via WhatsApp"
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2.11c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.5 3.42 1.46 4.88L2.11 22.9l6.01-1.58c1.4-.48 2.87-.72 4.36-.72 5.46 0 9.91-4.45 9.91-9.91S17.5 2.11 12.04 2.11zm4.61 14.28c-.28.7-1.74 1.41-2.45 1.41-.71 0-1.42-.3-2.07-.88-.71-.62-1.63-1.84-2.34-2.55s-1.12-1.7-.84-2.41c.28-.7.83-1.07 1.12-1.39.29-.3.65-.4.88-.23.23.17.65.2.98.6.34.4.65.8.98 1.13.3.3.61.34.88.17.29-.17.71-.23 1.12-.27.4-.04.91-.16 1.32-.47.4-.3.6-.66.83-1.07s.48-1.07.61-1.42c.13-.35.16-.62.06-.86s-.31-.56-.6-.71c-.29-.14-.62-.23-.88-.27-.26-.04-.57-.04-.88-.04-.32 0-.61.03-.83.06-.29.06-.6.18-.88.47s-.5.66-.6 1.07c-.1.4-.17.84-.04 1.25s.5.91 1.07 1.63c.57.71 1.25 1.58 1.84 2.19.57.6 1.07.8 1.42.8.35 0 .68-.07.95-.14.26-.07.6-.26.83-.54.23-.29.35-.6.44-.71.07-.1.15-.22.25-.32s.22-.2.32-.23.2-.08.3-.08c.1 0 .21.01.32.04l.32.12c.1.03.2.06.32.1.1.04.22.08.32.14.1.06.2.16.29.28.09.13.17.25.25.4.1.13.2.29.3.5.1.21.18.44.25.68.07.24.13.5.18.78.04.28.04.57.04.86.0 1.25-.91 1.96-1.78 2.24z"/></svg>
                         Send Enquiry
                       </a>
-                      <button
-                        onClick={() => {
-                          const w = window.open(
-                            images[lightboxIndex].src,
-                            "_blank"
-                          );
-                          if (w) w.opener = null;
-                        }}
-                        className="btn-glass px-4 py-2 text-sm rounded-md"
-                        aria-label="Open image in new tab"
-                      >
-                        Open in new tab
-                      </button>
                     </div>
                   </div>
                 </motion.div>
