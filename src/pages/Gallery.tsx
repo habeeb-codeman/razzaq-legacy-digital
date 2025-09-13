@@ -656,7 +656,7 @@ export default function GalleryPage(): JSX.Element {
                       >
                         Send Enquiry
                       </a>
-                      <button
+{/*                       <button
                         onClick={() => {
                           const w = window.open(
                             images[lightboxIndex].src,
@@ -668,7 +668,7 @@ export default function GalleryPage(): JSX.Element {
                         aria-label="Open image in new tab"
                       >
                         Open in new tab
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </motion.div>
