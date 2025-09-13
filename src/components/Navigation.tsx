@@ -161,7 +161,7 @@ const navItems = [
   { label: "Capabilities", id: "capabilities", isRoute: false },
   { label: "Partnerships", id: "partnerships", isRoute: false },
   { label: "Advantage", id: "advantage", isRoute: false },
-  { label: "Products", id: "/product", isRoute: true },
+  { label: "Products", id: "/gallery", isRoute: true },
   { label: "Contact", id: "contact", isRoute: false },
 ];
 
