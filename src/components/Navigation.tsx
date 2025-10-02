@@ -150,10 +150,11 @@
 // src/components/Navigation.tsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import razzaqLogo from "@/assets/razzaq-logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Home", id: "hero", isRoute: false },
@@ -170,6 +171,7 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -258,6 +260,25 @@ const Navigation = () => {
                   {item.label}
                 </button>
               )
+            )}
+            {isAdmin && (
+              <Link to="/admin" className="nav-link font-medium text-accent">
+                Admin
+              </Link>
+            )}
+            {user ? (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  <User className="w-4 h-4 mr-2" />
+                  Account
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
+              </Link>
             )}
             <Button
               onClick={() => handleNavClick({ label: "Get Quote", id: "contact", isRoute: false })}

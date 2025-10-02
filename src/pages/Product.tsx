@@ -1,684 +1,452 @@
-// // src/pages/Gallery.tsx
-// "use client";
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Phone, Mail, MessageCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// import React, { useEffect, useState, useCallback } from "react";
-// import { motion } from "framer-motion";
-// import Navigation from "@/components/Navigation";
-// import Footer from "@/components/Footer";
+interface Product {
+  id: string;
+  product_code: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  description: string | null;
+  images: string[];
+  phone: string | null;
+  price: number | null;
+  tags: string[] | null;
+  category_id: string | null;
+  published: boolean;
+}
 
-// /**
-//  * Resilient Gallery page:
-//  * - Tries to load public/images/gallery/gallery.json first (static manifest)
-//  * - Falls back to /api/gallery if manifest not found
-//  * - Shows filename (no extension) as top overlay on hover and description (from manifest/API) in bottom overlay
-//  *
-//  * To guarantee successful deploys on Vercel: add a static manifest at:
-//  * public/images/gallery/gallery.json
-//  */
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
-// type GalleryImage = {
-//   filename: string;
-//   src: string;
-//   title: string; // prettified filename (without extension)
-//   description?: string;
-// };
-
-// const MANIFEST_PATH = "/images/gallery/gallery.json";
-// const API_ENDPOINT = "/api/gallery";
-
-// function prettifyName(filename: string) {
-//   const base = filename.replace(/\.[^/.]+$/, "");
-//   return base
-//     .replace(/[_-]+/g, " ")
-//     .replace(/\b\w/g, (ch) => ch.toUpperCase());
-// }
-
-// export default function GalleryPage(): JSX.Element {
-//   const [images, setImages] = useState<GalleryImage[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-//   useEffect(() => {
-//     let mounted = true;
-//     setLoading(true);
-
-//     // Try static manifest first
-//     fetch(MANIFEST_PATH)
-//       .then((res) => {
-//         if (!res.ok) throw new Error("Manifest not found");
-//         return res.json();
-//       })
-//       .then((data) => {
-//         if (!mounted) return;
-
-//         if (Array.isArray(data)) {
-//           const list: GalleryImage[] = data
-//             .filter((it: any) => it && it.filename)
-//             .map((it: any) => ({
-//               filename: it.filename,
-//               src: `/images/gallery/${it.filename}`,
-//               title: prettifyName(it.filename),
-//               description: it.description || "",
-//             }));
-//           setImages(list);
-//           setError(null);
-//         } else {
-//           throw new Error("Invalid manifest format (expected array)");
-//         }
-//       })
-//       .catch(() => {
-//         // manifest failed — fallback to API
-//         fetch(API_ENDPOINT)
-//           .then((res) => {
-//             if (!res.ok) throw new Error(`API returned ${res.status}`);
-//             return res.json();
-//           })
-//           .then((data) => {
-//             if (!mounted) return;
-
-//             if (Array.isArray(data.images)) {
-//               const list: GalleryImage[] = data.images.map((item: any) => {
-//                 if (typeof item === "string") {
-//                   return {
-//                     filename: item,
-//                     src: `/images/gallery/${item}`,
-//                     title: prettifyName(item),
-//                     description: "",
-//                   };
-//                 } else {
-//                   const filename = item.filename || item.name;
-//                   return {
-//                     filename,
-//                     src: `/images/gallery/${filename}`,
-//                     title: prettifyName(filename),
-//                     description: item.description || "",
-//                   };
-//                 }
-//               });
-//               setImages(list);
-//               setError(null);
-//             } else {
-//               throw new Error("API returned unexpected structure");
-//             }
-//           })
-//           .catch((err) => {
-//             console.error("Gallery load error:", err);
-//             if (mounted) setError(String(err?.message || err));
-//             setImages([]);
-//           })
-//           .finally(() => {
-//             if (mounted) setLoading(false);
-//           });
-//       })
-//       .finally(() => {
-//         if (mounted) setLoading(false);
-//       });
-
-//     return () => {
-//       mounted = false;
-//     };
-//   }, []);
-
-//   const openLightbox = (index: number) => setLightboxIndex(index);
-//   const closeLightbox = () => setLightboxIndex(null);
-
-//   const showPrev = useCallback(() => {
-//     setLightboxIndex((prev) =>
-//       prev === null ? 0 : (prev - 1 + images.length) % images.length
-//     );
-//   }, [images.length]);
-
-//   const showNext = useCallback(() => {
-//     setLightboxIndex((prev) =>
-//       prev === null ? 0 : (prev + 1) % images.length
-//     );
-//   }, [images.length]);
-
-//   useEffect(() => {
-//     if (lightboxIndex === null) return;
-//     const onKey = (e: KeyboardEvent) => {
-//       if (e.key === "Escape") closeLightbox();
-//       if (e.key === "ArrowLeft") showPrev();
-//       if (e.key === "ArrowRight") showNext();
-//     };
-//     window.addEventListener("keydown", onKey);
-//     return () => window.removeEventListener("keydown", onKey);
-//   }, [lightboxIndex, showPrev, showNext]);
-
-//   return (
-//     <>
-//       <div className="min-h-screen bg-background">
-//         <Navigation />
-
-//         <main className="pt-24 pb-16">
-//           <section className="container mx-auto px-6 py-16">
-//             <motion.div
-//               initial={{ opacity: 0, y: 20 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               transition={{ duration: 0.6 }}
-//               className="text-center mb-12"
-//             >
-//               <h1 className="heading-primary mb-6">Our Gallery</h1>
-//               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-//                 Hover an image to see its title. Click to open viewer.
-//               </p>
-//             </motion.div>
-//           </section>
-
-//           <section className="container mx-auto px-6">
-//             {loading ? (
-//               <div className="text-center py-20 text-muted-foreground">
-//                 Loading gallery…
-//               </div>
-//             ) : error ? (
-//               <div className="text-center py-20 text-destructive">
-//                 Error: {error}
-//               </div>
-//             ) : images.length === 0 ? (
-//               <div className="text-center py-20 text-muted-foreground">
-//                 No gallery images found.
-//               </div>
-//             ) : (
-//               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-//                 {images.map((img, i) => (
-//                   <motion.div
-//                     key={img.filename}
-//                     initial={{ opacity: 0, scale: 0.98 }}
-//                     whileInView={{ opacity: 1, scale: 1 }}
-//                     viewport={{ once: true, amount: 0.2 }}
-//                     transition={{ duration: 0.45, delay: i * 0.04 }}
-//                     className="group relative overflow-hidden rounded-lg bg-card border border-border/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
-//                     onClick={() => openLightbox(i)}
-//                     role="button"
-//                     tabIndex={0}
-//                     onKeyDown={(e) => {
-//                       if (e.key === "Enter" || e.key === " ") openLightbox(i);
-//                     }}
-//                   >
-//                     <div className="aspect-[4/3] overflow-hidden">
-//                       <img
-//                         src={img.src}
-//                         alt={img.title}
-//                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-//                         loading="lazy"
-//                       />
-//                     </div>
-
-//                     {/* Top overlay: filename/title on hover */}
-//                     <div className="absolute left-0 right-0 top-0 p-3 pointer-events-none">
-//                       <div className="bg-gradient-to-b from-black/60 to-transparent rounded-b-md px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
-//                         <p className="text-xs text-white/95 font-medium truncate">
-//                           {img.title}
-//                         </p>
-//                       </div>
-//                     </div>
-
-//                     {/* Bottom overlay: description */}
-//                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-//                       <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
-//                         <h3 className="text-lg font-semibold text-foreground mb-1">
-//                           {img.title}
-//                         </h3>
-//                         <p className="text-sm text-muted-foreground">
-//                           {img.description && img.description.length > 0
-//                             ? img.description
-//                             : img.title}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </motion.div>
-//                 ))}
-//               </div>
-//             )}
-//           </section>
-
-//           {/* Lightbox */}
-//           {lightboxIndex !== null && images[lightboxIndex] && (
-//             <div
-//               aria-modal="true"
-//               role="dialog"
-//               aria-label={`${images[lightboxIndex].title} — image viewer`}
-//               className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
-//             >
-//               <div
-//                 className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-//                 onClick={closeLightbox}
-//               />
-//               <div className="relative max-w-6xl w-full mx-auto">
-//                 <motion.div
-//                   initial={{ scale: 0.95, opacity: 0 }}
-//                   animate={{ scale: 1, opacity: 1 }}
-//                   transition={{ duration: 0.25 }}
-//                   className="bg-background rounded-lg overflow-hidden shadow-2xl"
-//                 >
-//                   <div className="relative">
-//                     <img
-//                       src={images[lightboxIndex].src}
-//                       alt={images[lightboxIndex].title}
-//                       className="w-full h-[60vh] md:h-[80vh] object-contain bg-black"
-//                       loading="eager"
-//                     />
-//                     <button
-//                       onClick={closeLightbox}
-//                       aria-label="Close image viewer"
-//                       className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-foreground rounded-md p-2"
-//                     >
-//                       ✕
-//                     </button>
-//                     <button
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         setLightboxIndex((p) =>
-//                           p === null
-//                             ? 0
-//                             : (p - 1 + images.length) % images.length
-//                         );
-//                       }}
-//                       aria-label="Previous image"
-//                       className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
-//                     >
-//                       ‹
-//                     </button>
-//                     <button
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         setLightboxIndex((p) =>
-//                           p === null ? 0 : (p + 1) % images.length
-//                         );
-//                       }}
-//                       aria-label="Next image"
-//                       className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
-//                     >
-//                       ›
-//                     </button>
-//                   </div>
-//                   <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-//                     <div>
-//                       <h3 className="text-lg font-semibold">
-//                         {images[lightboxIndex].title}
-//                       </h3>
-//                       <p className="text-sm text-muted-foreground mt-1">
-//                         {images[lightboxIndex].description &&
-//                         images[lightboxIndex].description.length > 0
-//                           ? images[lightboxIndex].description
-//                           : images[lightboxIndex].title}
-//                       </p>
-//                     </div>
-//                     <div className="flex items-center gap-3">
-//                       <a
-//                         href={images[lightboxIndex].src}
-//                         download
-//                         className="btn-outline-hero px-4 py-2 text-sm rounded-md"
-//                         aria-label="Download image"
-//                       >
-//                         Download
-//                       </a>
-//                       <button
-//                         onClick={() => {
-//                           const w = window.open(
-//                             images[lightboxIndex].src,
-//                             "_blank"
-//                           );
-//                           if (w) w.opener = null;
-//                         }}
-//                         className="btn-glass px-4 py-2 text-sm rounded-md"
-//                         aria-label="Open image in new tab"
-//                       >
-//                         Open in new tab
-//                       </button>
-//                     </div>
-//                   </div>
-//                 </motion.div>
-//               </div>
-//             </div>
-//           )}
-//         </main>
-
-//         <Footer />
-//       </div>
-//     </>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// src/pages/Gallery.tsx
-"use client";
-
-import React, { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-
-/**
- * Products page:
- * - This version fetches product data from a static manifest file.
- * - Displays the product_name as the title and the description from the data.
- *
- * To guarantee successful deploys on Vercel: add a static manifest at:
- * public/images/gallery/gallery.json
- */
-
-type GalleryImage = {
-  filename: string;
-  src: string;
-  product_name: string;
-  description?: string;
-};
-
-const MANIFEST_PATH = "/images/gallery/gallery.json";
-const API_ENDPOINT = "/api/product";
-
-export default function GalleryPage(): JSX.Element {
-  const [images, setImages] = useState<GalleryImage[]>([]);
+const Product = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-
-    // Try static manifest first
-    fetch(MANIFEST_PATH)
-      .then((res) => {
-        if (!res.ok) throw new Error("Manifest not found");
-        return res.json();
-      })
-      .then((data) => {
-        if (!mounted) return;
-
-        if (Array.isArray(data)) {
-          const list: GalleryImage[] = data
-            .filter((it: any) => it && it.filename)
-            .map((it: any) => ({
-              filename: it.filename,
-              src: `/images/gallery/${it.filename}`,
-              product_name: it.product_name || it.filename.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " "),
-              description: it.description || "",
-            }));
-          setImages(list);
-          setError(null);
-        } else {
-          throw new Error("Invalid manifest format (expected array)");
+    fetchCategories();
+    fetchProducts();
+    
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        () => {
+          fetchProducts();
         }
-      })
-      .catch(() => {
-        // manifest failed — fallback to API
-        fetch(API_ENDPOINT)
-          .then((res) => {
-            if (!res.ok) throw new Error(`API returned ${res.status}`);
-            return res.json();
-          })
-          .then((data) => {
-            if (!mounted) return;
-
-            if (Array.isArray(data.images)) {
-              const list: GalleryImage[] = data.images.map((item: any) => {
-                const filename = item.filename || item.name;
-                return {
-                  filename,
-                  src: `/images/gallery/${filename}`,
-                  product_name: item.product_name || filename.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " "),
-                  description: item.description || "",
-                };
-              });
-              setImages(list);
-              setError(null);
-            } else {
-              throw new Error("API returned unexpected structure");
-            }
-          })
-          .catch((err) => {
-            console.error("Gallery load error:", err);
-            if (mounted) setError(String(err?.message || err));
-            setImages([]);
-          })
-          .finally(() => {
-            if (mounted) setLoading(false);
-          });
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+      )
+      .subscribe();
 
     return () => {
-      mounted = false;
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  const openLightbox = (index: number) => setLightboxIndex(index);
-  const closeLightbox = () => setLightboxIndex(null);
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .select('*')
+      .order('name');
 
-  const showPrev = useCallback(() => {
-    setLightboxIndex((prev) =>
-      prev === null ? 0 : (prev - 1 + images.length) % images.length
-    );
-  }, [images.length]);
+    if (error) {
+      console.error('Error fetching categories:', error);
+    } else {
+      setCategories(data || []);
+    }
+  };
 
-  const showNext = useCallback(() => {
-    setLightboxIndex((prev) =>
-      prev === null ? 0 : (prev + 1) % images.length
-    );
-  }, [images.length]);
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false });
 
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowLeft") showPrev();
-      if (e.key === "ArrowRight") showNext();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxIndex, showPrev, showNext]);
+    if (error) {
+      toast.error('Failed to load products');
+      console.error(error);
+    } else {
+      const formattedProducts = (data || []).map(p => ({
+        ...p,
+        images: Array.isArray(p.images) ? p.images as string[] : []
+      }));
+      setProducts(formattedProducts);
+    }
+    setLoading(false);
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.short_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = 
+      selectedCategory === 'all' || product.category_id === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const handleWhatsAppInquiry = (product: Product) => {
+    const phone = product.phone || '+919876543210'; // Default company phone
+    const message = `Hello Razzaq Automotives — I'm interested in Product ${product.product_code}: "${product.name}". Please share details & availability.`;
+    const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleEmailInquiry = (product: Product) => {
+    const subject = `Inquiry about ${product.product_code}: ${product.name}`;
+    const body = `Hello,\n\nI'm interested in:\n\nProduct Code: ${product.product_code}\nProduct Name: ${product.name}\n\nPlease provide more details and pricing information.\n\nThank you.`;
+    window.location.href = `mailto:info@razzaqautomotives.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handlePhoneCall = (product: Product) => {
+    const phone = product.phone || '+919876543210';
+    window.location.href = `tel:${phone}`;
+  };
+
+  const openLightbox = (product: Product, index: number) => {
+    setSelectedProduct(product);
+    setLightboxIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+  };
+
+  const showPrevImage = () => {
+    if (selectedProduct && lightboxIndex !== null) {
+      setLightboxIndex((lightboxIndex - 1 + selectedProduct.images.length) % selectedProduct.images.length);
+    }
+  };
+
+  const showNextImage = () => {
+    if (selectedProduct && lightboxIndex !== null) {
+      setLightboxIndex((lightboxIndex + 1) % selectedProduct.images.length);
+    }
+  };
 
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <Navigation />
+    <div className="min-h-screen bg-background text-foreground">
+      <SEO 
+        title="Premium Truck Parts & Components - Browse Our Products"
+        description="Explore Razzaq Automotives' extensive range of truck parts including cabins, fuel tanks, body parts, and electrical systems. Quality parts for TATA, Ashok Leyland & Bharat Benz vehicles."
+        keywords="truck parts catalog, heavy vehicle components, TATA parts, Ashok Leyland spares, truck body parts, electrical systems"
+      />
+      
+      <Navigation />
+      
+      <main className="pt-24 pb-16">
+        {/* Hero Section */}
+        <section className="container mx-auto px-6 py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h1 className="heading-primary mb-6">Our Products</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Browse our extensive catalog of premium truck parts and components
+            </p>
+          </motion.div>
 
-        <main className="pt-24 pb-16">
-          <section className="container mx-auto px-6 py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <h1 className="heading-primary mb-6">Our Products</h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hover on a product to see its name. Click to open a larger view with details.
-              </p>
-            </motion.div>
-          </section>
-
-          <section className="container mx-auto px-6">
-            {loading ? (
-              <div className="text-center py-20 text-muted-foreground">
-                Loading products…
-              </div>
-            ) : error ? (
-              <div className="text-center py-20 text-destructive">
-                Error: {error}
-              </div>
-            ) : images.length === 0 ? (
-              <div className="text-center py-20 text-muted-foreground">
-                No products found.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {images.map((img, i) => (
-                  <motion.div
-                    key={img.filename}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.45, delay: i * 0.04 }}
-                    className="group relative overflow-hidden rounded-lg bg-card border border-border/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
-                    onClick={() => openLightbox(i)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") openLightbox(i);
-                    }}
-                  >
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={img.src}
-                        alt={img.product_name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                    </div>
-
-                    {/* Top overlay: product name on hover */}
-                    <div className="absolute left-0 right-0 top-0 p-3 pointer-events-none">
-                      <div className="bg-gradient-to-b from-black/60 to-transparent rounded-b-md px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
-                        <p className="text-xs text-white/95 font-medium truncate">
-                          {img.product_name}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bottom overlay: description */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
-                        <h3 className="text-lg font-semibold text-foreground mb-1">
-                          {img.product_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {img.description}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Lightbox */}
-          {lightboxIndex !== null && images[lightboxIndex] && (
-            <div
-              aria-modal="true"
-              role="dialog"
-              aria-label={`${images[lightboxIndex].product_name} — image viewer`}
-              className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
-            >
-              <div
-                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-                onClick={closeLightbox}
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto mb-12">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
               />
-              <div className="relative max-w-6xl w-full mx-auto">
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </section>
+
+        {/* Products Grid */}
+        <section className="container mx-auto px-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <Card className="p-12 text-center">
+              <p className="text-muted-foreground">No products found matching your search.</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product, i) => (
                 <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-background rounded-lg overflow-hidden shadow-2xl"
+                  key={product.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: i * 0.03 }}
                 >
-                  <div className="relative">
-                    <img
-                      src={images[lightboxIndex].src}
-                      alt={images[lightboxIndex].product_name}
-                      className="w-full h-[60vh] md:h-[80vh] object-contain bg-black"
-                      loading="eager"
-                    />
-                    <button
-                      onClick={closeLightbox}
-                      aria-label="Close image viewer"
-                      className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-foreground rounded-md p-2"
+                  <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                    {/* Product Image */}
+                    <div 
+                      className="relative aspect-square overflow-hidden cursor-pointer bg-muted"
+                      onClick={() => setSelectedProduct(product)}
                     >
-                      ✕
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxIndex((p) =>
-                          p === null
-                            ? 0
-                            : (p - 1 + images.length) % images.length
-                        );
-                      }}
-                      aria-label="Previous image"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxIndex((p) =>
-                          p === null ? 0 : (p + 1) % images.length
-                        );
-                      }}
-                      aria-label="Next image"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-white/10 rounded-full p-2"
-                    >
-                      ›
-                    </button>
-                  </div>
-                  <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {images[lightboxIndex].product_name}
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          No Image
+                        </div>
+                      )}
+                      
+                      {/* Product Code Badge */}
+                      <div className="absolute top-3 left-3">
+                        <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+                          {product.product_code}
+                        </Badge>
+                      </div>
+
+                      {/* Price Badge */}
+                      {product.price && (
+                        <div className="absolute top-3 right-3">
+                          <Badge className="bg-accent text-accent-foreground">
+                            ₹{product.price.toLocaleString()}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="p-4 flex flex-col flex-1">
+                      <h3 className="font-heading font-bold text-lg mb-2 line-clamp-2 group-hover:text-accent transition-colors">
+                        {product.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {images[lightboxIndex].description}
-                      </p>
+                      
+                      {product.short_description && (
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                          {product.short_description}
+                        </p>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 mt-auto">
+                        <Button
+                          onClick={() => handleWhatsAppInquiry(product)}
+                          className="flex-1 btn-hero"
+                          size="sm"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          WhatsApp
+                        </Button>
+                        <Button
+                          onClick={() => setSelectedProduct(product)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Details
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={images[lightboxIndex].src}
-                        download
-                        className="btn-outline-hero px-4 py-2 text-sm rounded-md"
-                        aria-label="Download image"
-                      >
-                        Download
-                      </a>
-                      <a
-                        href={`https://wa.me/918885673388?text=Hello, I would like to enquire about the product: ${images[lightboxIndex].product_name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-glass px-4 py-2 text-sm rounded-md"
-                        aria-label="Send an enquiry via WhatsApp"
-                      >
-                        Send Enquiry
-                      </a>
-{/*                       <button
-                        onClick={() => {
-                          const w = window.open(
-                            images[lightboxIndex].src,
-                            "_blank"
-                          );
-                          if (w) w.opener = null;
-                        }}
-                        className="btn-glass px-4 py-2 text-sm rounded-md"
-                        aria-label="Open image in new tab"
-                      >
-                        Open in new tab
-                      </button> */}
-                    </div>
-                  </div>
+                  </Card>
                 </motion.div>
-              </div>
+              ))}
             </div>
           )}
-        </main>
+        </section>
+      </main>
 
-        <Footer />
-      </div>
-    </>
+      {/* Product Detail Modal */}
+      <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedProduct && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-heading">
+                  {selectedProduct.name}
+                </DialogTitle>
+                <Badge variant="secondary" className="w-fit mt-2">
+                  {selectedProduct.product_code}
+                </Badge>
+              </DialogHeader>
+
+              <div className="space-y-6">
+                {/* Image Gallery */}
+                {selectedProduct.images && selectedProduct.images.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {selectedProduct.images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => openLightbox(selectedProduct, idx)}
+                      >
+                        <img
+                          src={img}
+                          alt={`${selectedProduct.name} ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Price */}
+                {selectedProduct.price && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Price</h4>
+                    <p className="text-2xl font-bold text-accent">
+                      ₹{selectedProduct.price.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {/* Description */}
+                {selectedProduct.description && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Description</h4>
+                    <p className="text-foreground whitespace-pre-wrap">{selectedProduct.description}</p>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {selectedProduct.tags && selectedProduct.tags.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProduct.tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Actions */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t">
+                  <Button
+                    onClick={() => handleWhatsAppInquiry(selectedProduct)}
+                    className="btn-hero"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    WhatsApp
+                  </Button>
+                  <Button
+                    onClick={() => handlePhoneCall(selectedProduct)}
+                    variant="outline"
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    Call
+                  </Button>
+                  <Button
+                    onClick={() => handleEmailInquiry(selectedProduct)}
+                    variant="outline"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      {lightboxIndex !== null && selectedProduct && selectedProduct.images[lightboxIndex] && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white hover:text-accent transition-colors z-10"
+          >
+            <X size={32} />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              showPrevImage();
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-accent transition-colors z-10"
+          >
+            <ChevronLeft size={48} />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              showNextImage();
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-accent transition-colors z-10"
+          >
+            <ChevronRight size={48} />
+          </button>
+
+          <motion.img
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            src={selectedProduct.images[lightboxIndex]}
+            alt={selectedProduct.name}
+            className="max-w-full max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
+            {lightboxIndex + 1} / {selectedProduct.images.length}
+          </div>
+        </div>
+      )}
+
+      <Footer />
+    </div>
   );
-}
+};
+
+export default Product;

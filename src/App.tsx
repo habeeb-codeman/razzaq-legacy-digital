@@ -4,8 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/admin/Dashboard";
+import Products from "./pages/admin/Products";
+import ProductForm from "./pages/admin/ProductForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,13 +23,51 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/product" element={<Product />} />
-            <Route path="/gallery" element={<Navigate to="/product" replace />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/product" element={<Product />} />
+              <Route path="/gallery" element={<Navigate to="/product" replace />} />
+              <Route path="/auth" element={<Auth />} />
+              
+              {/* Admin Routes - Protected */}
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Products />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products/new" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <ProductForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products/edit/:id" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <ProductForm />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* 404 - ADD ALL CUSTOM ROUTES ABOVE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
