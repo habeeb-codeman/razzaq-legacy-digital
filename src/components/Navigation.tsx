@@ -267,7 +267,7 @@ const Navigation = () => {
               </Link>
             )}
             {user ? (
-              <Link to="/auth">
+              <Link to="/profile">
                 <Button variant="outline" size="sm">
                   <User className="w-4 h-4 mr-2" />
                   Account

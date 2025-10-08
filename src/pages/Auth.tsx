@@ -23,6 +23,19 @@ const Auth = () => {
     return <Navigate to="/" replace />;
   }
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    if (!/[A-Z]/.test(pwd)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+      return 'Password must contain at least one special character';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -31,13 +44,14 @@ const Auth = () => {
       return;
     }
 
-    if (!isLogin && password !== confirmPassword) {
-      toast.error('Passwords do not match');
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
 
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    if (!isLogin && password !== confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -54,6 +68,7 @@ const Auth = () => {
         if (error) {
           toast.error(error.message);
         } else {
+          toast.success('Check your email to confirm your account!');
           setIsLogin(true);
           setEmail('');
           setPassword('');
@@ -123,8 +138,13 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  minLength={6}
+                  minLength={8}
                 />
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Min 8 characters, 1 uppercase, 1 special character
+                  </p>
+                )}
               </div>
 
               {!isLogin && (
@@ -138,7 +158,7 @@ const Auth = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
-                    minLength={6}
+                    minLength={8}
                   />
                 </div>
               )}

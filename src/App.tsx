@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
@@ -29,6 +30,14 @@ const App = () => (
               <Route path="/product" element={<Product />} />
               <Route path="/gallery" element={<Navigate to="/product" replace />} />
               <Route path="/auth" element={<Auth />} />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
               
               {/* Admin Routes - Protected */}
               <Route 
