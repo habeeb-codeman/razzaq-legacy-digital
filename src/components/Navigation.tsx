@@ -210,10 +210,9 @@ const Navigation = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/98 backdrop-blur-md border-b border-border/30 shadow-subtle"
+          ? "bg-background/95 backdrop-blur-sm border-b border-border/20"
           : "bg-transparent"
       }`}
     >
@@ -222,8 +221,7 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/">
             <motion.div
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.05 }}
               className="flex items-center space-x-3"
             >
               <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">

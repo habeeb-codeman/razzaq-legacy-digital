@@ -164,119 +164,117 @@ const HeroSection = () => {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Refined Overlay */}
+      {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img
           src={heroTruck}
           alt="Modern truck on highway at dusk - Razzaq Automotives"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/96 via-background/75 to-background/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-background/20" />
-        {/* Subtle glass overlay */}
-        <div className="absolute inset-0 bg-white/[0.015] backdrop-blur-[0.5px]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+        {/* Glass overlay effect */}
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-[1px]" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 text-center lg:text-left">
         <div className="max-w-4xl">
-          {/* Refined Badge */}
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-            className="inline-flex items-center px-5 py-2.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-accent/30 mb-8 shadow-card"
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-accent/40 mb-6 shadow-lg"
           >
-            <span className="text-accent font-medium text-sm">Established 1976</span>
-            <span className="mx-3 text-muted-foreground/50">•</span>
-            <span className="text-foreground/90 text-sm">50+ Years of Excellence</span>
+            <span className="text-accent font-medium">Established 1976</span>
+            <span className="mx-2 text-muted-foreground">•</span>
+            <span className="text-foreground">50+ Years of Excellence</span>
           </motion.div>
 
           {/* Main Headlines */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="text-hero mb-8 leading-[1.1]"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-hero mb-6 leading-tight"
           >
-            <span className="block text-foreground/95">Your Fleet's Demands</span>
-            <span className="block text-primary font-bold mt-2" style={{ textShadow: '0 0 30px hsl(var(--primary) / 0.3)' }}>
-              Simplified.
-            </span>
+            <span className="block">Your Fleet's Demands</span>
+            <span className="block text-accent-glow">Simplified.</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="text-lg lg:text-xl text-muted-foreground/80 mb-10 max-w-2xl leading-relaxed"
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl leading-relaxed"
           >
             Vijayawada's most trusted source for advanced heavy vehicle body solutions for{' '}
-            <span className="text-primary/90 font-medium">TATA</span>,{' '}
-            <span className="text-primary/90 font-medium">Ashok Leyland</span>, and{' '}
-            <span className="text-primary/90 font-medium">Bharat Benz</span>.
+            <span className="text-primary font-semibold"> TATA</span>,{' '}
+            <span className="text-primary font-semibold"> Ashok Leyland</span>, and{' '}
+            <span className="text-primary font-semibold"> Bharat Benz</span>.
           </motion.p>
 
           {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="flex flex-col sm:flex-row gap-4 mb-14"
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 mb-12"
           >
-            <Button onClick={() => scrollToSection('legacy')} size="lg" className="btn-hero text-base px-7 py-6 rounded-xl">
+            <Button onClick={() => scrollToSection('legacy')} size="lg" className="btn-hero text-lg px-8 py-6">
               Explore Our Legacy
             </Button>
-            <Button onClick={() => scrollToSection('contact')} variant="outline" size="lg" className="btn-outline-hero text-base px-7 py-6 rounded-xl">
+            <Button onClick={() => scrollToSection('contact')} variant="outline" size="lg" className="btn-outline-hero text-lg px-8 py-6">
               Connect With Us
             </Button>
           </motion.div>
 
-          {/* Contact Info */}
+          {/* Contact Info (clickable phone & email) */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="flex flex-col sm:flex-row items-center gap-5 text-muted-foreground/70 text-sm"
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="flex flex-col sm:flex-row items-center gap-6 text-muted-foreground"
           >
             <a
               href="tel:+918885673388"
               aria-label="Call Razzaq Automotives at +91 888-567-3388"
-              className="flex items-center gap-2 hover:text-primary transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-2 hover:text-primary transition-colors"
             >
-              <Phone size={15} />
+              <Phone size={16} />
               <span>+91 888-567-3388</span>
             </a>
 
-            <div className="hidden sm:block w-1 h-1 bg-accent/40 rounded-full" />
+            <div className="hidden sm:block w-1 h-1 bg-accent rounded-full" />
 
             <a
               href="mailto:razzaqautomotives.vij@gmail.com"
               aria-label="Email Razzaq Automotives at razzaqautomotives.vij@gmail.com"
-              className="flex items-center gap-2 hover:text-primary transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-2 hover:text-primary transition-colors"
             >
-              <Mail size={15} />
+              <Mail size={16} />
               <span>razzaqautomotives.vij@gmail.com</span>
             </a>
           </motion.div>
         </div>
       </div>
 
-      {/* Refined Scroll Indicator */}
+      {/* Scroll Indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, delay: 1.4 }}
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer"
+        transition={{ duration: 1, delay: 1.2 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
         onClick={() => scrollToSection('legacy')}
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center text-muted-foreground/60 hover:text-primary transition-all duration-300"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors"
         >
-          <span className="text-xs mb-2 tracking-wider uppercase">Scroll to explore</span>
-          <ArrowDown size={18} className="opacity-70" />
+          <span className="text-sm mb-2">Scroll to explore</span>
+          <ArrowDown size={20} />
         </motion.div>
       </motion.div>
     </section>

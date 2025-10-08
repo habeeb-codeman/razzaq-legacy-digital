@@ -7,58 +7,56 @@
 
 @layer base {
   :root {
-    /* Core Brand Colors - Refined Minimal Palette */
-    --background: 215 28% 17%; /* Sophisticated Dark Blue-Gray */
-    --foreground: 210 40% 98%; /* Crisp White */
+    /* Core Brand Colors - Premium Industrial Palette */
+    --background: 210 45% 8%; /* Deep Charcoal/Midnight Blue #0B1726 */
+    --foreground: 40 15% 96%; /* Off-White #F6F4F2 */
 
-    --card: 215 25% 22%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 40% 12%;
+    --card-foreground: 40 15% 96%;
 
-    --popover: 215 28% 19%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 40% 10%;
+    --popover-foreground: 40 15% 96%;
 
-    /* Primary - Refined Teal */
-    --primary: 174 72% 56%; /* #4ECDC4 - Softer, more sophisticated */
-    --primary-foreground: 215 28% 17%;
+    /* Primary - Energetic Teal for CTAs and accents */
+    --primary: 177 100% 33%; /* #00A89D */
+    --primary-foreground: 210 45% 8%;
 
-    /* Secondary - Elevated tone */
-    --secondary: 215 22% 25%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary - Slightly lighter industrial tone */
+    --secondary: 210 35% 15%;
+    --secondary-foreground: 40 15% 96%;
 
-    --muted: 215 20% 28%;
-    --muted-foreground: 210 15% 65%;
+    --muted: 210 30% 20%;
+    --muted-foreground: 40 8% 70%;
 
-    /* Accent - Warm Gold */
-    --accent: 38 92% 50%; /* #ECA72C - More refined gold */
-    --accent-foreground: 215 28% 17%;
+    /* Accent - Industrial Gold for highlights */
+    --accent: 43 100% 67%; /* #FFC857 */
+    --accent-foreground: 210 45% 8%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 40 15% 96%;
 
-    --border: 215 20% 30%;
-    --input: 215 22% 23%;
-    --ring: 174 72% 56%;
+    --border: 210 25% 25%;
+    --input: 210 25% 18%;
+    --ring: 177 100% 33%;
 
-    --radius: 0.875rem;
+    --radius: 0.75rem;
 
-    /* Refined Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(174 72% 56%) 0%, hsl(174 72% 48%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(215 28% 17%) 0%, hsl(215 32% 20%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(215 25% 22%) 0%, hsl(215 22% 19%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 45%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(215 28% 17%) 0%, hsl(215 25% 22%) 100%);
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(177 100% 33%), hsl(177 100% 28%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 45% 8%) 0%, hsl(210 50% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 40% 12%), hsl(210 35% 10%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 100% 67%), hsl(43 100% 60%));
 
-    /* Refined Shadows - More Natural */
-    --shadow-premium: 0 25px 50px -12px hsl(215 28% 10% / 0.4);
-    --shadow-card: 0 10px 30px -5px hsl(215 28% 10% / 0.25);
-    --shadow-glow: 0 0 50px hsl(174 72% 56% / 0.12);
-    --shadow-accent: 0 8px 25px -5px hsl(38 92% 50% / 0.2);
-    --shadow-subtle: 0 4px 16px -4px hsl(215 28% 10% / 0.15);
+    /* Industrial Shadows and Effects */
+    --shadow-premium: 0 20px 50px -10px hsl(210 45% 4% / 0.5);
+    --shadow-card: 0 8px 32px hsl(210 45% 4% / 0.3);
+    --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.15);
+    --shadow-accent: 0 4px 20px hsl(43 100% 67% / 0.25);
 
-    /* Smooth Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Enhanced Animations */
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 }
 
@@ -79,93 +77,66 @@
 }
 
 @layer components {
-  /* Refined Button Variants - More Minimal */
+  /* Premium Button Variants with Glass Effects */
   .btn-hero {
-    @apply bg-gradient-primary text-primary-foreground 
-           shadow-card hover:shadow-glow
-           transform hover:-translate-y-0.5 hover:scale-[1.02]
-           transition-all duration-300 backdrop-blur-sm relative overflow-hidden;
-  }
-  
-  .btn-hero::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent translate-x-[-100%] transition-transform duration-500;
-  }
-  
-  .btn-hero:hover::before {
-    @apply translate-x-[100%];
+    @apply bg-gradient-primary text-primary-foreground hover:bg-primary/90 
+           shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-300 backdrop-blur-sm relative overflow-hidden
+           before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
+           before:via-white/10 before:to-transparent before:translate-x-[-100%] 
+           hover:before:translate-x-[100%] before:transition-transform before:duration-700;
   }
 
   .btn-accent {
-    @apply bg-gradient-accent text-accent-foreground
-           shadow-card hover:shadow-accent
-           transform hover:-translate-y-0.5 hover:scale-[1.02]
-           transition-all duration-300 backdrop-blur-sm relative overflow-hidden;
-  }
-  
-  .btn-accent::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.12] to-transparent translate-x-[-100%] transition-transform duration-500;
-  }
-  
-  .btn-accent:hover::before {
-    @apply translate-x-[100%];
+    @apply bg-gradient-accent text-accent-foreground hover:bg-accent/90 
+           shadow-accent hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-300 backdrop-blur-sm relative overflow-hidden
+           before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
+           before:via-white/20 before:to-transparent before:translate-x-[-100%] 
+           hover:before:translate-x-[100%] before:transition-transform before:duration-700;
   }
 
   .btn-outline-hero {
-    @apply border border-primary/40 text-primary bg-primary/[0.08] backdrop-blur-md
-           hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/80
-           shadow-card hover:shadow-glow
-           transform hover:-translate-y-0.5 hover:scale-[1.02]
-           transition-all duration-300 relative overflow-hidden;
-  }
-  
-  .btn-outline-hero::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.15] to-transparent translate-x-[-100%] transition-transform duration-500;
-  }
-  
-  .btn-outline-hero:hover::before {
-    @apply translate-x-[100%];
+    @apply border-2 border-primary/60 text-primary bg-primary/5 backdrop-blur-md
+           hover:bg-primary hover:text-primary-foreground hover:border-primary
+           shadow-glow hover:shadow-xl transform hover:-translate-y-1 hover:scale-105
+           transition-all duration-300 relative overflow-hidden
+           before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
+           before:via-primary/20 before:to-transparent before:translate-x-[-100%] 
+           hover:before:translate-x-[100%] before:transition-transform before:duration-700;
   }
 
   .btn-glass {
-    @apply bg-white/[0.08] backdrop-blur-md border border-white/[0.15] text-white
-           hover:bg-white/[0.15] hover:border-white/[0.25] 
-           transform hover:-translate-y-0.5 hover:scale-[1.02]
-           transition-all duration-300 rounded-xl relative overflow-hidden;
-  }
-  
-  .btn-glass::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] transition-transform duration-500;
-  }
-  
-  .btn-glass:hover::before {
-    @apply translate-x-[100%];
+    @apply bg-white/10 backdrop-blur-md border border-white/20 text-white
+           hover:bg-white/20 hover:border-white/30 
+           transform hover:-translate-y-1 hover:scale-105 
+           transition-all duration-300 rounded-xl relative overflow-hidden
+           before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
+           before:via-white/30 before:to-transparent before:translate-x-[-100%] 
+           hover:before:translate-x-[100%] before:transition-transform before:duration-700;
   }
 
-  /* Refined Card Components */
+  /* Card Components with Glass Effects */
   .card-premium {
-    @apply bg-card/30 backdrop-blur-md border border-border/40 rounded-xl p-6 
+    @apply bg-card/20 backdrop-blur-md border border-border/30 rounded-xl p-6 
            shadow-card hover:shadow-premium 
-           transform hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.2), hsl(var(--card) / 0.08));
-    backdrop-filter: blur(16px);
+           transform hover:-translate-y-1 transition-all duration-300 relative overflow-hidden;
+    background: linear-gradient(145deg, hsl(var(--card) / 0.15), hsl(var(--card) / 0.05));
+    backdrop-filter: blur(12px);
   }
 
   .card-hero {
-    @apply bg-background/40 backdrop-blur-lg border border-border/30 
+    @apply bg-background/30 backdrop-blur-lg border border-border/20 
            rounded-xl p-8 shadow-premium relative overflow-hidden;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.2), hsl(var(--card) / 0.1));
-    backdrop-filter: blur(20px);
+    background: linear-gradient(145deg, hsl(var(--card) / 0.15), hsl(var(--card) / 0.05));
+    backdrop-filter: blur(16px);
   }
 
   .glass-card {
-    @apply bg-background/[0.12] backdrop-blur-xl border border-white/[0.12] 
-           rounded-2xl shadow-premium p-6 relative overflow-hidden;
-    background: linear-gradient(145deg, hsl(var(--background) / 0.12), hsl(var(--card) / 0.08));
-    backdrop-filter: blur(24px);
+    @apply bg-background/10 backdrop-blur-xl border border-white/10 
+           rounded-2xl shadow-2xl p-6 relative overflow-hidden;
+    background: linear-gradient(145deg, hsl(var(--background) / 0.1), hsl(var(--card) / 0.05));
+    backdrop-filter: blur(20px);
   }
 
 /*   .glass-card::before {
@@ -176,22 +147,21 @@
 
   .glass-card::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-transparent opacity-50;
+  @apply absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-60;
   border-radius: inherit;
-  pointer-events: none;
+  pointer-events: none; /* allow clicks to pass through */
 }
 
 
   .frosted-glass {
-    @apply bg-white/[0.06] backdrop-blur-md border border-white/[0.12] rounded-xl p-4 relative;
-    backdrop-filter: blur(20px);
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 relative;
+    backdrop-filter: blur(16px);
   }
 
   .frosted-glass::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-40;
+    @apply absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50;
     border-radius: inherit;
-    pointer-events: none;
   }
 
   /* Text Styles */
@@ -210,9 +180,9 @@
     text-shadow: 0 0 20px hsl(var(--accent) / 0.5);
   }
 
-  /* Scroll Animations - Smoother */
+  /* Scroll Animations */
   .fade-in-up {
-    @apply opacity-0 translate-y-6 transition-all duration-600 ease-out;
+    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
   }
 
   .fade-in-up.animate {
@@ -220,7 +190,7 @@
   }
 
   .parallax {
-    @apply transition-transform duration-100 ease-out;
+    @apply transition-transform duration-75 ease-out;
   }
 
   /* Particle Effects */
@@ -254,26 +224,26 @@
 
   /* Enhanced Glass Effects */
   .glass-border {
-    @apply border border-white/[0.15] bg-white/[0.06] backdrop-blur-xl;
+    @apply border border-white/20 bg-white/5 backdrop-blur-xl;
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 10px 30px -5px rgba(0, 0, 0, 0.2);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
-  /* Industrial Elements - More Minimal */
+  /* Industrial Elements */
   .industrial-line {
-    @apply h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent;
+    @apply h-px bg-gradient-to-r from-transparent via-accent to-transparent;
   }
 
   .glow-border {
-    @apply border border-primary/20 shadow-glow;
+    @apply border border-primary/30 shadow-glow;
   }
 
-  /* Navigation - Refined */
+  /* Navigation */
   .nav-link {
-    @apply text-foreground/70 hover:text-foreground transition-all duration-300 
-           relative after:content-[''] after:absolute after:w-0 after:h-[2px] 
-           after:bottom-0 after:left-0 after:bg-primary after:rounded-full
-           after:transition-all after:duration-300 hover:after:w-full;
+    @apply text-foreground/80 hover:text-foreground transition-colors duration-300 
+           relative after:content-[''] after:absolute after:w-0 after:h-0.5 
+           after:bottom-0 after:left-0 after:bg-primary after:transition-all 
+           after:duration-300 hover:after:w-full;
   }
 }
