@@ -67,7 +67,8 @@ export default {
 				premium: 'var(--shadow-premium)',
 				card: 'var(--shadow-card)',
 				glow: 'var(--shadow-glow)',
-				accent: 'var(--shadow-accent)'
+				accent: 'var(--shadow-accent)',
+				subtle: 'var(--shadow-subtle)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
