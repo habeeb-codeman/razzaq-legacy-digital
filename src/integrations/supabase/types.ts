@@ -14,6 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
+      bill_items: {
+        Row: {
+          bill_id: string
+          cgst_amount: number
+          cgst_rate: number
+          created_at: string
+          description: string
+          hsn_sac: string
+          id: string
+          product_id: string | null
+          quantity: number
+          rate: number
+          sgst_amount: number
+          sgst_rate: number
+          taxable_value: number
+          total_amount: number
+          unit: string
+        }
+        Insert: {
+          bill_id: string
+          cgst_amount: number
+          cgst_rate?: number
+          created_at?: string
+          description: string
+          hsn_sac?: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          rate: number
+          sgst_amount: number
+          sgst_rate?: number
+          taxable_value: number
+          total_amount: number
+          unit?: string
+        }
+        Update: {
+          bill_id?: string
+          cgst_amount?: number
+          cgst_rate?: number
+          created_at?: string
+          description?: string
+          hsn_sac?: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          rate?: number
+          sgst_amount?: number
+          sgst_rate?: number
+          taxable_value?: number
+          total_amount?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bills: {
+        Row: {
+          bill_number: string
+          cgst_amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_date: string
+          notes: string | null
+          party_address: string | null
+          party_gstin: string | null
+          party_name: string
+          party_phone: string | null
+          place_of_supply: string
+          remaining_amount: number
+          sgst_amount: number
+          subtotal: number
+          total_amount: number
+          total_tax: number
+          updated_at: string
+        }
+        Insert: {
+          bill_number: string
+          cgst_amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string
+          notes?: string | null
+          party_address?: string | null
+          party_gstin?: string | null
+          party_name: string
+          party_phone?: string | null
+          place_of_supply?: string
+          remaining_amount?: number
+          sgst_amount?: number
+          subtotal?: number
+          total_amount?: number
+          total_tax?: number
+          updated_at?: string
+        }
+        Update: {
+          bill_number?: string
+          cgst_amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string
+          notes?: string | null
+          party_address?: string | null
+          party_gstin?: string | null
+          party_name?: string
+          party_phone?: string | null
+          place_of_supply?: string
+          remaining_amount?: number
+          sgst_amount?: number
+          subtotal?: number
+          total_amount?: number
+          total_tax?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_categories: {
         Row: {
           created_at: string
@@ -129,6 +261,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_bill_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_product_code: {
         Args: Record<PropertyKey, never>
         Returns: string
