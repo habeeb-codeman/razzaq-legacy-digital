@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
+import Bills from "./pages/admin/Bills";
+import CreateBill from "./pages/admin/CreateBill";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +71,22 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <ProductForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/bills" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Bills />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/bills/new" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <CreateBill />
                   </ProtectedRoute>
                 } 
               />

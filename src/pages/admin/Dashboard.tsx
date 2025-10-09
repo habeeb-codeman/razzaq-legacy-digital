@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, LogOut } from 'lucide-react';
+import { Package, ShoppingBag, Users, LogOut, FileText, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalProducts: 0,
     publishedProducts: 0,
-    draftProducts: 0
+    draftProducts: 0,
+    totalBills: 0
   });
 
   useEffect(() => {
@@ -31,10 +32,15 @@ const Dashboard = () => {
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
 
+    const { count: billsCount } = await supabase
+      .from('bills')
+      .select('*', { count: 'exact', head: true });
+
     setStats({
       totalProducts: total || 0,
       publishedProducts: published || 0,
-      draftProducts: (total || 0) - (published || 0)
+      draftProducts: (total || 0) - (published || 0),
+      totalBills: billsCount || 0
     });
   };
 
@@ -83,7 +89,7 @@ const Dashboard = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -113,6 +119,16 @@ const Dashboard = () => {
                 <div className="text-2xl font-bold">{stats.draftProducts}</div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Bills</CardTitle>
+                <Receipt className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalBills}</div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Quick Actions */}
@@ -120,7 +136,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link to="/admin/products">
                 <Button className="w-full btn-hero" size="lg">
                   <Package className="w-5 h-5 mr-2" />
@@ -130,6 +146,12 @@ const Dashboard = () => {
               <Link to="/admin/products/new">
                 <Button className="w-full" variant="outline" size="lg">
                   Add New Product
+                </Button>
+              </Link>
+              <Link to="/admin/bills">
+                <Button className="w-full" variant="outline" size="lg">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Billing System
                 </Button>
               </Link>
             </CardContent>
