@@ -138,7 +138,7 @@ const BulkImport = () => {
 
       if (error) throw error;
 
-      toast.success(`Successfully imported ${data.length} products!`);
+      toast.success(`Successfully imported ${data.length} products as drafts! Now add images and publish them.`);
       navigate('/admin/products');
     } catch (error: any) {
       console.error('Import error:', error);
@@ -183,6 +183,15 @@ const BulkImport = () => {
           <div>
             <h1 className="text-3xl font-heading font-bold mb-2">Bulk Import Products</h1>
             <p className="text-muted-foreground">Import multiple products at once using JSON format</p>
+            <div className="mt-3 p-4 bg-accent/10 border border-accent/20 rounded-lg">
+              <p className="text-sm font-medium text-accent mb-1">📋 Import Workflow:</p>
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Import products using JSON (creates drafts by default)</li>
+                <li>Go to Products page and edit each product</li>
+                <li>Add images to individual products</li>
+                <li>Toggle "Published" to make them visible to users</li>
+              </ol>
+            </div>
           </div>
 
           {/* Example & Download */}
@@ -219,7 +228,7 @@ const BulkImport = () => {
                   <li><strong>phone</strong>: Contact number</li>
                   <li><strong>tags</strong>: Array of tags for categorization</li>
                   <li><strong>category</strong>: Category slug (must exist)</li>
-                  <li><strong>published</strong>: true/false (default: false)</li>
+                  <li><strong>published</strong>: true/false (default: false - recommended for bulk imports)</li>
                 </ul>
               </div>
             </CardContent>

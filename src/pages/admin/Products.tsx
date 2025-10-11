@@ -166,6 +166,11 @@ const Products = () => {
                         <Badge variant={product.published ? "default" : "secondary"}>
                           {product.published ? 'Published' : 'Draft'}
                         </Badge>
+                        {(!product.images || (Array.isArray(product.images) && product.images.length === 0)) && (
+                          <Badge variant="outline" className="text-xs">
+                            No Images
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">{product.product_code}</p>
                       {product.short_description && (
