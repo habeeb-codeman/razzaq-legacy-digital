@@ -39,6 +39,7 @@ const Bills = () => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBills();
@@ -63,6 +64,7 @@ const Bills = () => {
   };
 
   const downloadBill = async (billId: string) => {
+    setDownloadingId(billId);
     try {
       const { data: bill, error: billError } = await supabase
         .from('bills')
@@ -75,9 +77,15 @@ const Bills = () => {
       const { data: items, error: itemsError } = await supabase
         .from('bill_items')
         .select('*')
-        .eq('bill_id', billId);
+        .eq('bill_id', billId)
+        .order('created_at');
 
       if (itemsError) throw itemsError;
+
+      if (!items || items.length === 0) {
+        toast.error('No items found for this bill');
+        return;
+      }
 
       await generateBillPDF({
         bill_number: bill.bill_number,
@@ -108,10 +116,12 @@ const Bills = () => {
         remaining_amount: bill.remaining_amount
       });
 
-      toast.success('Bill downloaded successfully');
+      toast.success('Bill PDF downloaded successfully');
     } catch (error: any) {
-      toast.error('Failed to download bill');
-      console.error('Error:', error);
+      console.error('Download error:', error);
+      toast.error(error.message || 'Failed to download bill. Please try again.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -253,8 +263,13 @@ const Bills = () => {
                                 onClick={() => downloadBill(bill.id)}
                                 size="sm"
                                 variant="outline"
+                                disabled={downloadingId === bill.id}
                               >
-                                <Download className="w-4 h-4" />
+                                {downloadingId === bill.id ? (
+                                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
+                                )}
                               </Button>
                               <Button
                                 onClick={() => deleteBill(bill.id, bill.bill_number)}

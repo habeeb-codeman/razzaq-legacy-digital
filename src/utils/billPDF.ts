@@ -32,8 +32,13 @@ interface BillData {
 }
 
 export const generateBillPDF = async (data: BillData) => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.width;
+  try {
+    if (!data.bill_number || !data.party_name || !data.items || data.items.length === 0) {
+      throw new Error('Invalid bill data. Missing required fields.');
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
   
   // Company Header
   doc.setFillColor(240, 240, 240);
@@ -98,15 +103,15 @@ export const generateBillPDF = async (data: BillData) => {
   
   // Items Table
   const tableData = data.items.map((item) => [
-    item.description,
-    item.hsn_sac,
-    item.quantity.toFixed(2),
-    item.unit,
-    item.rate.toFixed(2),
-    item.taxable_value.toFixed(2),
-    item.cgst_amount.toFixed(2),
-    item.sgst_amount.toFixed(2),
-    item.total_amount.toFixed(2)
+    item.description || 'N/A',
+    item.hsn_sac || '8708',
+    (item.quantity || 0).toFixed(2),
+    item.unit || 'Pcs',
+    (item.rate || 0).toFixed(2),
+    (item.taxable_value || 0).toFixed(2),
+    (item.cgst_amount || 0).toFixed(2),
+    (item.sgst_amount || 0).toFixed(2),
+    (item.total_amount || 0).toFixed(2)
   ]);
   
   autoTable(doc, {
@@ -158,12 +163,13 @@ export const generateBillPDF = async (data: BillData) => {
   const hsnGroups: { [key: string]: { taxable: number; cgst: number; sgst: number } } = {};
   
   data.items.forEach(item => {
-    if (!hsnGroups[item.hsn_sac]) {
-      hsnGroups[item.hsn_sac] = { taxable: 0, cgst: 0, sgst: 0 };
+    const hsn = item.hsn_sac || '8708';
+    if (!hsnGroups[hsn]) {
+      hsnGroups[hsn] = { taxable: 0, cgst: 0, sgst: 0 };
     }
-    hsnGroups[item.hsn_sac].taxable += item.taxable_value;
-    hsnGroups[item.hsn_sac].cgst += item.cgst_amount;
-    hsnGroups[item.hsn_sac].sgst += item.sgst_amount;
+    hsnGroups[hsn].taxable += item.taxable_value || 0;
+    hsnGroups[hsn].cgst += item.cgst_amount || 0;
+    hsnGroups[hsn].sgst += item.sgst_amount || 0;
   });
   
   const hsnData = Object.entries(hsnGroups).map(([hsn, values]) => [
@@ -240,5 +246,9 @@ export const generateBillPDF = async (data: BillData) => {
   doc.text('Authorised Signatory', rightX - 60, termsY + 36);
   
   // Save PDF
-  doc.save(`${data.bill_number}.pdf`);
+  doc.save(`${data.bill_number.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+  } catch (error: any) {
+    console.error('PDF Generation Error:', error);
+    throw new Error(`Failed to generate PDF: ${error.message || 'Unknown error'}`);
+  }
 };

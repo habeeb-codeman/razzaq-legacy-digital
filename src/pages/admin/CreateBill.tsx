@@ -39,9 +39,10 @@ interface BillItem {
 
 const CreateBill = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(true);
   
   // Party details
   const [partyName, setPartyName] = useState('');
@@ -73,17 +74,22 @@ const CreateBill = () => {
   }, []);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('id, name, price, product_code')
-      .eq('published', true)
-      .order('name');
+    try {
+      setProductsLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, product_code')
+        .eq('published', true)
+        .order('name');
 
-    if (error) {
-      toast.error('Failed to load products');
-      return;
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error: any) {
+      console.error('Error loading products:', error);
+      toast.error('Failed to load products. You can still create custom items.');
+    } finally {
+      setProductsLoading(false);
     }
-    setProducts(data || []);
   };
 
   const calculateItemValues = (item: BillItem): BillItem => {
@@ -152,13 +158,29 @@ const CreateBill = () => {
   };
 
   const saveBill = async () => {
-    if (!partyName) {
+    // Validation
+    if (!partyName.trim()) {
       toast.error('Please enter party name');
       return;
     }
 
-    if (items.some(item => !item.description || item.rate <= 0)) {
-      toast.error('Please fill all item details');
+    if (partyGstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(partyGstin)) {
+      toast.error('Invalid GSTIN format. Please check and try again.');
+      return;
+    }
+
+    if (partyPhone && !/^[0-9]{10}$/.test(partyPhone.replace(/\s+/g, ''))) {
+      toast.error('Phone number should be 10 digits');
+      return;
+    }
+
+    if (items.length === 0) {
+      toast.error('Please add at least one item');
+      return;
+    }
+
+    if (items.some(item => !item.description.trim() || item.rate <= 0 || item.quantity <= 0)) {
+      toast.error('Please fill all item details with valid values');
       return;
     }
 
@@ -220,10 +242,11 @@ const CreateBill = () => {
 
       if (itemsError) throw itemsError;
 
-      toast.success('Bill created successfully!');
+      toast.success(`Bill ${billNumberData} created successfully!`);
       
       // Generate and download PDF
-      await generateBillPDF({
+      try {
+        await generateBillPDF({
         bill_number: billNumberData,
         invoice_date: invoiceDate,
         party_name: partyName,
@@ -238,17 +261,52 @@ const CreateBill = () => {
         total: totals.total,
         remaining_amount: totals.total
       });
+        toast.success('PDF downloaded successfully!');
+      } catch (pdfError: any) {
+        console.error('PDF generation error:', pdfError);
+        toast.error('Bill saved but PDF generation failed. You can download it from the Bills page.');
+      }
 
-      navigate('/admin/bills');
+      setTimeout(() => navigate('/admin/bills'), 1000);
     } catch (error: any) {
       console.error('Error creating bill:', error);
-      toast.error(error.message || 'Failed to create bill');
+      if (error.message?.includes('generate_bill_number')) {
+        toast.error('Failed to generate bill number. Please try again.');
+      } else if (error.message?.includes('permission')) {
+        toast.error('You do not have permission to create bills. Please contact admin.');
+      } else {
+        toast.error(error.message || 'Failed to create bill. Please check all fields and try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const totals = calculateTotals();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground mb-4">Please log in to access billing</p>
+            <Button onClick={() => navigate('/auth')}>Go to Login</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -314,24 +372,28 @@ const CreateBill = () => {
                   rows={3}
                 />
               </div>
-              <div>
-                <Label htmlFor="partyGstin">GSTIN</Label>
-                <Input
-                  id="partyGstin"
-                  value={partyGstin}
-                  onChange={(e) => setPartyGstin(e.target.value)}
-                  placeholder="e.g., 37AAICP9359G1ZU"
-                />
-              </div>
-              <div>
-                <Label htmlFor="partyPhone">Phone</Label>
-                <Input
-                  id="partyPhone"
-                  value={partyPhone}
-                  onChange={(e) => setPartyPhone(e.target.value)}
-                  placeholder="Enter phone number"
-                />
-              </div>
+                <div>
+                  <Label htmlFor="partyGstin">GSTIN (Optional)</Label>
+                  <Input
+                    id="partyGstin"
+                    value={partyGstin}
+                    onChange={(e) => setPartyGstin(e.target.value.toUpperCase())}
+                    placeholder="e.g., 37AAICP9359G1ZU"
+                    maxLength={15}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">15 characters, format: 00AAAAA0000A0Z0</p>
+                </div>
+                <div>
+                  <Label htmlFor="partyPhone">Phone (Optional)</Label>
+                  <Input
+                    id="partyPhone"
+                    type="tel"
+                    value={partyPhone}
+                    onChange={(e) => setPartyPhone(e.target.value.replace(/\D/g, ''))}
+                    placeholder="10-digit number"
+                    maxLength={10}
+                  />
+                </div>
               <div>
                 <Label htmlFor="invoiceDate">Invoice Date</Label>
                 <Input
@@ -384,15 +446,20 @@ const CreateBill = () => {
                       <Select
                         value={item.product_id || ''}
                         onValueChange={(value) => updateItem(index, 'product_id', value || undefined)}
+                        disabled={productsLoading}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select existing product or enter custom" />
+                          <SelectValue placeholder={
+                            productsLoading 
+                              ? "Loading products..." 
+                              : "Select existing product or enter custom"
+                          } />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="">Custom Item</SelectItem>
                           {products.map((product) => (
                             <SelectItem key={product.id} value={product.id}>
-                              {product.product_code} - {product.name}
+                              {product.product_code} - {product.name} {product.price ? `(₹${product.price})` : ''}
                             </SelectItem>
                           ))}
                         </SelectContent>
