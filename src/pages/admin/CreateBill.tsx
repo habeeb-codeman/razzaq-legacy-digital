@@ -13,7 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { generateBillPDF } from '@/utils/billPDF';
 import SEO from '@/components/SEO';
-import razzaqLogo from '@/assets/razzaq-logo.png';
 
 interface Product {
   id: string;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -127,12 +127,20 @@ const Products = () => {
               />
             </div>
 
-            <Link to="/admin/products/new">
-              <Button className="btn-hero w-full sm:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/admin/products/bulk-import">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </Button>
+              </Link>
+              <Link to="/admin/products/new">
+                <Button className="btn-hero w-full sm:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Products List */}

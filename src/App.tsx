@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
+import BulkImport from "./pages/admin/BulkImport";
 import Bills from "./pages/admin/Bills";
 import CreateBill from "./pages/admin/CreateBill";
 import NotFound from "./pages/NotFound";
@@ -75,7 +76,15 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/admin/bills" 
+                path="/admin/products/bulk-import" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <BulkImport />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/bills"
                 element={
                   <ProtectedRoute requireAdmin>
                     <Bills />

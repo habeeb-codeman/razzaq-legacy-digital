@@ -17,7 +17,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateBillPDF } from '@/utils/billPDF';
 import SEO from '@/components/SEO';
-import razzaqLogo from '@/assets/razzaq-logo.png';
 
 interface Bill {
   id: string;
@@ -152,13 +151,10 @@ const Bills = () => {
       <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/admin" className="flex items-center space-x-3">
-              <img src={razzaqLogo} alt="Razzaq Automotives" className="w-10 h-10" />
-              <div>
-                <h1 className="font-heading font-bold text-xl text-foreground">Billing System</h1>
-                <p className="text-accent text-xs font-medium">Manage Invoices</p>
-              </div>
-            </Link>
+            <div>
+              <h1 className="font-heading font-bold text-2xl text-foreground">Billing System</h1>
+              <p className="text-muted-foreground">Manage Invoices</p>
+            </div>
 
             <Link to="/admin/bills/new">
               <Button className="btn-hero">
