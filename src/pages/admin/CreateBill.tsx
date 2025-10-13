@@ -465,8 +465,8 @@ const CreateBill = () => {
                     <div className="md:col-span-3">
                       <Label>Select Product (Optional)</Label>
                       <Select
-                        value={item.product_id || ''}
-                        onValueChange={(value) => updateItem(index, 'product_id', value || undefined)}
+                        value={item.product_id || 'custom'}
+                        onValueChange={(value) => updateItem(index, 'product_id', value === 'custom' ? undefined : value)}
                         disabled={productsLoading}
                       >
                         <SelectTrigger>
@@ -477,7 +477,7 @@ const CreateBill = () => {
                           } />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Custom Item</SelectItem>
+                          <SelectItem value="custom">Custom Item</SelectItem>
                           {products.map((product) => (
                             <SelectItem key={product.id} value={product.id}>
                               {product.product_code} - {product.name} {product.price ? `(₹${product.price})` : ''}
