@@ -244,27 +244,48 @@ const CreateBill = () => {
 
       toast.success(`Bill ${billNumberData} created successfully!`);
       
-      // Generate and download PDF
+      // Generate PDF and upload to storage
       try {
-        await generateBillPDF({
-        bill_number: billNumberData,
-        invoice_date: invoiceDate,
-        party_name: partyName,
-        party_address: partyAddress,
-        party_gstin: partyGstin,
-        party_phone: partyPhone,
-        place_of_supply: placeOfSupply,
-        items,
-        subtotal: totals.subtotal,
-        cgst: totals.cgst,
-        sgst: totals.sgst,
-        total: totals.total,
-        remaining_amount: totals.total
-      });
-        toast.success('PDF downloaded successfully!');
+        const pdfBlob = await generateBillPDF({
+          bill_number: billNumberData,
+          invoice_date: invoiceDate,
+          party_name: partyName,
+          party_address: partyAddress,
+          party_gstin: partyGstin,
+          party_phone: partyPhone,
+          place_of_supply: placeOfSupply,
+          items,
+          subtotal: totals.subtotal,
+          cgst: totals.cgst,
+          sgst: totals.sgst,
+          total: totals.total,
+          remaining_amount: totals.total
+        });
+
+        const fileName = `${billNumberData.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.pdf`;
+        const filePath = `${user?.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('bills')
+          .upload(filePath, pdfBlob, {
+            contentType: 'application/pdf',
+            upsert: false
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Update bill with PDF URL
+        const { error: updateError } = await supabase
+          .from('bills')
+          .update({ pdf_url: filePath })
+          .eq('id', billData.id);
+
+        if (updateError) throw updateError;
+
+        toast.success('Bill and PDF created successfully!');
       } catch (pdfError: any) {
-        console.error('PDF generation error:', pdfError);
-        toast.error('Bill saved but PDF generation failed. You can download it from the Bills page.');
+        console.error('PDF generation/upload error:', pdfError);
+        toast.error('Bill saved but PDF upload failed. You can regenerate it from the Bills page.');
       }
 
       setTimeout(() => navigate('/admin/bills'), 1000);

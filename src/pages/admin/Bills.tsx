@@ -74,49 +74,76 @@ const Bills = () => {
 
       if (billError) throw billError;
 
-      const { data: items, error: itemsError } = await supabase
-        .from('bill_items')
-        .select('*')
-        .eq('bill_id', billId)
-        .order('created_at');
+      // If PDF exists in storage, download it directly
+      if (bill.pdf_url) {
+        const { data: pdfData, error: downloadError } = await supabase.storage
+          .from('bills')
+          .download(bill.pdf_url);
 
-      if (itemsError) throw itemsError;
+        if (downloadError) throw downloadError;
 
-      if (!items || items.length === 0) {
-        toast.error('No items found for this bill');
-        return;
+        const url = URL.createObjectURL(pdfData);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${bill.bill_number.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        toast.success('Bill PDF downloaded successfully');
+      } else {
+        // Fallback: regenerate PDF from database data
+        const { data: items, error: itemsError } = await supabase
+          .from('bill_items')
+          .select('*')
+          .eq('bill_id', billId)
+          .order('created_at');
+
+        if (itemsError) throw itemsError;
+
+        if (!items || items.length === 0) {
+          toast.error('No items found for this bill');
+          return;
+        }
+
+        const pdfBlob = await generateBillPDF({
+          bill_number: bill.bill_number,
+          invoice_date: bill.invoice_date,
+          party_name: bill.party_name,
+          party_address: bill.party_address,
+          party_gstin: bill.party_gstin,
+          party_phone: bill.party_phone,
+          place_of_supply: bill.place_of_supply,
+          items: items.map(item => ({
+            id: item.id,
+            description: item.description,
+            hsn_sac: item.hsn_sac,
+            quantity: item.quantity,
+            unit: item.unit,
+            rate: item.rate,
+            taxable_value: item.taxable_value,
+            cgst_rate: item.cgst_rate,
+            sgst_rate: item.sgst_rate,
+            cgst_amount: item.cgst_amount,
+            sgst_amount: item.sgst_amount,
+            total_amount: item.total_amount
+          })),
+          subtotal: bill.subtotal,
+          cgst: bill.cgst_amount,
+          sgst: bill.sgst_amount,
+          total: bill.total_amount,
+          remaining_amount: bill.remaining_amount
+        });
+
+        // Download the regenerated PDF
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${bill.bill_number.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        toast.success('Bill PDF regenerated and downloaded successfully');
       }
-
-      await generateBillPDF({
-        bill_number: bill.bill_number,
-        invoice_date: bill.invoice_date,
-        party_name: bill.party_name,
-        party_address: bill.party_address,
-        party_gstin: bill.party_gstin,
-        party_phone: bill.party_phone,
-        place_of_supply: bill.place_of_supply,
-        items: items.map(item => ({
-          id: item.id,
-          description: item.description,
-          hsn_sac: item.hsn_sac,
-          quantity: item.quantity,
-          unit: item.unit,
-          rate: item.rate,
-          taxable_value: item.taxable_value,
-          cgst_rate: item.cgst_rate,
-          sgst_rate: item.sgst_rate,
-          cgst_amount: item.cgst_amount,
-          sgst_amount: item.sgst_amount,
-          total_amount: item.total_amount
-        })),
-        subtotal: bill.subtotal,
-        cgst: bill.cgst_amount,
-        sgst: bill.sgst_amount,
-        total: bill.total_amount,
-        remaining_amount: bill.remaining_amount
-      });
-
-      toast.success('Bill PDF downloaded successfully');
     } catch (error: any) {
       console.error('Download error:', error);
       toast.error(error.message || 'Failed to download bill. Please try again.');

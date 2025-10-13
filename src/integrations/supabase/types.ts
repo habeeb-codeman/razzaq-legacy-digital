@@ -96,6 +96,7 @@ export type Database = {
           party_gstin: string | null
           party_name: string
           party_phone: string | null
+          pdf_url: string | null
           place_of_supply: string
           remaining_amount: number
           sgst_amount: number
@@ -116,6 +117,7 @@ export type Database = {
           party_gstin?: string | null
           party_name: string
           party_phone?: string | null
+          pdf_url?: string | null
           place_of_supply?: string
           remaining_amount?: number
           sgst_amount?: number
@@ -136,6 +138,7 @@ export type Database = {
           party_gstin?: string | null
           party_name?: string
           party_phone?: string | null
+          pdf_url?: string | null
           place_of_supply?: string
           remaining_amount?: number
           sgst_amount?: number

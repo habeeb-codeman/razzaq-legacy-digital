@@ -31,7 +31,7 @@ interface BillData {
   remaining_amount: number;
 }
 
-export const generateBillPDF = async (data: BillData) => {
+export const generateBillPDF = async (data: BillData): Promise<Blob> => {
   try {
     if (!data.bill_number || !data.party_name || !data.items || data.items.length === 0) {
       throw new Error('Invalid bill data. Missing required fields.');
@@ -245,10 +245,26 @@ export const generateBillPDF = async (data: BillData) => {
   doc.text('_____________________________', rightX - 60, termsY + 30);
   doc.text('Authorised Signatory', rightX - 60, termsY + 36);
   
-  // Save PDF
-  doc.save(`${data.bill_number.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+  // Return PDF as blob
+  const pdfBlob = doc.output('blob');
+  return pdfBlob;
   } catch (error: any) {
     console.error('PDF Generation Error:', error);
     throw new Error(`Failed to generate PDF: ${error.message || 'Unknown error'}`);
+  }
+};
+
+export const downloadBillPDF = async (data: BillData) => {
+  try {
+    const pdfBlob = await generateBillPDF(data);
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${data.bill_number.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error: any) {
+    console.error('PDF Download Error:', error);
+    throw new Error(`Failed to download PDF: ${error.message || 'Unknown error'}`);
   }
 };
