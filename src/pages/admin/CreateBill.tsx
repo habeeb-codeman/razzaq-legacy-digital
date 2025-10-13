@@ -55,7 +55,7 @@ const CreateBill = () => {
 
   // Bill items
   const [items, setItems] = useState<BillItem[]>([{
-    id: crypto.randomUUID(),
+    id: (globalThis.crypto?.randomUUID?.() ?? `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`),
     description: '',
     hsn_sac: '8708',
     quantity: 1,
@@ -127,7 +127,7 @@ const CreateBill = () => {
 
   const addItem = () => {
     setItems([...items, {
-      id: crypto.randomUUID(),
+      id: (globalThis.crypto?.randomUUID?.() ?? `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`),
       description: '',
       hsn_sac: '8708',
       quantity: 1,
