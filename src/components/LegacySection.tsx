@@ -21,11 +21,11 @@ const LegacySection = () => {
       stats: 'New Leadership & Innovation'
     },
     {
-      year: 'Today',
-      title: 'Industry Benchmark',
-      description: 'Celebrating 50+ years as Autonagar\'s leading authority in heavy vehicle solutions, serving major fleets across Andhra Pradesh.',
+      year: '2024-2026',
+      title: 'Golden Jubilee Approaching',
+      description: 'As we approach our 50th anniversary in 2026, we celebrate nearly five decades as Autonagar\'s leading authority in heavy vehicle solutions, serving major fleets across Andhra Pradesh with unwavering commitment.',
       icon: <Award className="w-6 h-6" />,
-      stats: '50+ Years Strong'
+      stats: 'Golden Jubilee - 50 Years in 2026'
     }
   ];
 
@@ -40,12 +40,12 @@ const LegacySection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-section-title mb-6">
-            From a Vision in <span className="text-accent">1976</span> to an Industry Benchmark
+            From a Vision in <span className="text-accent">1976</span> to 50 Years in <span className="text-accent">2026</span>
           </h2>
           <div className="industrial-line w-24 mx-auto mb-6" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Our journey spans five decades of innovation, trust, and excellence in heavy vehicle solutions, 
-            building lasting partnerships with industry leaders.
+            As we approach our Golden Jubilee in 2026, we celebrate nearly five decades of innovation, 
+            trust, and excellence in heavy vehicle solutions, building lasting partnerships with industry leaders.
           </p>
         </motion.div>
 

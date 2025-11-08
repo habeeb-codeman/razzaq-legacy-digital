@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { MessageCircle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface GalleryItem {
   filename: string;
@@ -27,6 +29,13 @@ const Gallery = () => {
         setLoading(false);
       });
   }, []);
+
+  const handleWhatsAppInquiry = (item: GalleryItem) => {
+    const phone = '+919876543210'; // Default company phone
+    const message = `Hello Razzaq Automotives — I'm interested in "${item.product_name}" from your gallery. Please share details & availability.`;
+    const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,7 +88,7 @@ const Gallery = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
                 >
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group h-full flex flex-col">
                     <div className="aspect-square overflow-hidden bg-muted">
                       <img
                         src={`/images/gallery/${item.filename}`}
@@ -88,13 +97,21 @@ const Gallery = () => {
                         loading="lazy"
                       />
                     </div>
-                    <CardContent className="p-4">
+                    <CardContent className="p-4 flex flex-col flex-1">
                       <h3 className="font-semibold text-sm mb-1 line-clamp-2">
                         {item.product_name}
                       </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
                         {item.description}
                       </p>
+                      <Button
+                        onClick={() => handleWhatsAppInquiry(item)}
+                        className="btn-hero w-full"
+                        size="sm"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Inquire on WhatsApp
+                      </Button>
                     </CardContent>
                   </Card>
                 </motion.div>

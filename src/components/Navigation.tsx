@@ -159,6 +159,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const navItems = [
   { label: "Home", id: "hero", isRoute: false },
   { label: "Legacy", id: "legacy", isRoute: false },
+  { label: "Timeline", id: "/timeline", isRoute: true },
   { label: "Capabilities", id: "capabilities", isRoute: false },
   { label: "Partnerships", id: "partnerships", isRoute: false },
   { label: "Advantage", id: "advantage", isRoute: false },

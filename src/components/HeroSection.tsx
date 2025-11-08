@@ -185,11 +185,11 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-accent/40 mb-6 shadow-lg"
+            className="inline-flex items-center px-6 py-3 rounded-full glass-card border border-accent/40 mb-6 shadow-glow"
           >
             <span className="text-accent font-medium">Established 1976</span>
             <span className="mx-2 text-muted-foreground">•</span>
-            <span className="text-foreground">50+ Years of Excellence</span>
+            <span className="text-foreground">Celebrating 50 Years in 2026!</span>
           </motion.div>
 
           {/* Main Headlines */}
