@@ -7,52 +7,22 @@ const TestimonialsSection = () => {
 
   const testimonials = [
     {
-      name: 'Rajesh Kumar',
-      company: 'Kumar Transport Services',
       role: 'Fleet Manager',
       content: 'Working with Razzaq Automotives for over 15 years has been exceptional. Their parts quality is unmatched, and the service is always prompt. They understand the urgency of keeping our fleet running.',
-      rating: 5,
-      image: '👨‍💼'
-    },
-    {
-      name: 'Suresh Reddy',
-      company: 'Reddy Logistics',
-      role: 'Operations Director',
-      content: 'The expertise and reliability of Razzaq Automotives is outstanding. They have genuine parts in stock and their technical knowledge helps us maintain our trucks in top condition. Truly a trusted partner.',
-      rating: 5,
-      image: '👔'
-    },
-    {
-      name: 'Venkat Rao',
-      company: 'Rao Brothers Fleet',
-      role: 'Owner',
-      content: 'From body parts to electrical systems, Razzaq has everything we need under one roof. Their pricing is competitive and the quality is consistently excellent. We recommend them to all our industry contacts.',
       rating: 5,
       image: '🚛'
     },
     {
-      name: 'Mohammad Ibrahim',
-      company: 'Ibrahim Transport Co.',
-      role: 'Managing Partner',
-      content: 'Three generations of quality service! We started with their founder and continue today. The commitment to customer satisfaction and genuine parts has never wavered. They are the gold standard in the industry.',
-      rating: 5,
-      image: '⭐'
-    },
-    {
-      name: 'Satish Naidu',
-      company: 'Naidu Cargo Services',
-      role: 'Maintenance Head',
-      content: 'Their technical team is incredibly knowledgeable about TATA, Ashok Leyland, and Bharat Benz vehicles. They help us source the right parts quickly, minimizing our downtime. Excellent service always!',
+      role: 'Truck Owner',
+      content: 'The expertise and reliability of Razzaq Automotives is outstanding. They have genuine parts in stock and their technical knowledge helps us maintain our trucks in top condition. Truly a trusted partner.',
       rating: 5,
       image: '🔧'
     },
     {
-      name: 'Prakash Singh',
-      company: 'Singh Freight Solutions',
-      role: 'Owner-Operator',
-      content: 'What sets Razzaq apart is their personal attention to each customer. Whether it\'s a small spare part or a major body component, they treat every order with the same care and professionalism.',
+      role: 'Mechanic',
+      content: 'From body parts to electrical systems, Razzaq has everything we need under one roof. Their pricing is competitive and the quality is consistently excellent. We recommend them to all our industry contacts.',
       rating: 5,
-      image: '👍'
+      image: '⭐'
     }
   ];
 
@@ -113,14 +83,8 @@ const TestimonialsSection = () => {
                   {testimonial.image}
                 </div>
                 <div>
-                  <h4 className="font-heading font-semibold text-foreground">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {testimonial.role}
-                  </p>
-                  <p className="text-xs text-accent font-medium">
-                    {testimonial.company}
                   </p>
                 </div>
               </div>

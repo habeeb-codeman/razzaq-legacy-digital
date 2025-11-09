@@ -9,7 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from './pages/Index';
 import Product from './pages/Product';
 import Gallery from './pages/Gallery';
-import Timeline from './pages/Timeline';
+
 import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Dashboard from "./pages/admin/Dashboard";
@@ -32,9 +32,8 @@ const App = () => (
           <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/product" element={<Product />} />
+              <Route path="/products" element={<Product />} />
               <Route path="/gallery" element={<Gallery />} />
-              <Route path="/timeline" element={<Timeline />} />
               <Route path="/auth" element={<Auth />} />
               <Route 
                 path="/profile" 

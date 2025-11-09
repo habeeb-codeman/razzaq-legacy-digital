@@ -157,13 +157,10 @@ import razzaqLogo from "@/assets/razzaq-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
-  { label: "Home", id: "hero", isRoute: false },
-  { label: "Legacy", id: "legacy", isRoute: false },
-  { label: "Timeline", id: "/timeline", isRoute: true },
-  { label: "Capabilities", id: "capabilities", isRoute: false },
+  { label: "Home", id: "/", isRoute: true },
   { label: "Partnerships", id: "partnerships", isRoute: false },
   { label: "Advantage", id: "advantage", isRoute: false },
-  { label: "Products", id: "/product", isRoute: true },
+  { label: "Products", id: "/products", isRoute: true },
   { label: "Gallery", id: "/gallery", isRoute: true },
   { label: "Contact", id: "contact", isRoute: false },
 ];
