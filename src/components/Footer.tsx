@@ -184,19 +184,12 @@
 
 
 
-import React from "react";
-import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
-  Facebook,
-  Instagram,
-  Linkedin,
-} from "lucide-react";
-import razzaqLogo from "@/assets/razzaq-logo.png";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Linkedin } from 'lucide-react';
+import razzaqLogo from '@/assets/razzaq-logo.png';
+import { useTreasureHunt } from '@/hooks/useTreasureHunt';
 
 const REVIEW_URL = "https://g.page/r/CVo8voo1GVplEBM/review";
 const MAP_APP_LINK = "https://maps.app.goo.gl/iw9V2EXDWC7off1MA";
@@ -214,15 +207,28 @@ const openExternal = (url: string) => {
   if (w) w.opener = null;
 };
 
-const Footer: React.FC = () => {
+const Footer = () => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.08,
   });
+  const [estdClicks, setEstdClicks] = useState(0);
+  const { updateProgress } = useTreasureHunt();
 
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId);
     if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleEstdClick = () => {
+    setEstdClicks((prev) => {
+      const newClicks = prev + 1;
+      if (newClicks >= 3) {
+        updateProgress('clue5');
+        return 0;
+      }
+      return newClicks;
+    });
   };
 
   return (
@@ -251,7 +257,13 @@ const Footer: React.FC = () => {
                 <h3 className="font-heading font-bold text-xl">
                   Razzaq Automotives
                 </h3>
-                <p className="text-accent text-sm">Estd. 1976</p>
+                <p 
+                  className="text-accent text-sm cursor-pointer select-none" 
+                  onClick={handleEstdClick}
+                  title="Triple-click for a surprise!"
+                >
+                  Estd. 1976
+                </p>
               </div>
             </div>
 
@@ -261,29 +273,38 @@ const Footer: React.FC = () => {
             </p>
 
             <div className="flex space-x-4">
-              <button
-                onClick={() => openExternal("https://www.facebook.com/")}
-                aria-label="Razzaq Automotives Facebook (opens in new tab)"
+              <motion.a 
+                whileHover={{ scale: 1.1 }}
+                href="https://www.facebook.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Razzaq Automotives Facebook"
                 className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
               >
                 <Facebook className="w-5 h-5 text-primary" />
-              </button>
+              </motion.a>
 
-              <button
-                onClick={() => openExternal("https://www.instagram.com/")}
-                aria-label="Razzaq Automotives Instagram (opens in new tab)"
+              <motion.a 
+                whileHover={{ scale: 1.1 }}
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Razzaq Automotives Instagram"
                 className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
               >
                 <Instagram className="w-5 h-5 text-primary" />
-              </button>
+              </motion.a>
 
-              <button
-                onClick={() => openExternal("https://www.linkedin.com/")}
-                aria-label="Razzaq Automotives LinkedIn (opens in new tab)"
+              <motion.a 
+                whileHover={{ scale: 1.1 }}
+                href="https://www.linkedin.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Razzaq Automotives LinkedIn"
                 className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center hover:bg-primary/20 transition-colors"
               >
                 <Linkedin className="w-5 h-5 text-primary" />
-              </button>
+              </motion.a>
             </div>
           </div>
 
@@ -293,17 +314,18 @@ const Footer: React.FC = () => {
             <nav className="space-y-3" aria-label="quick links">
               {[
                 { label: "Our Legacy", id: "legacy" },
-                { label: "Capabilities", id: "capabilities" },
                 { label: "Partnerships", id: "partnerships" },
                 { label: "Our Advantage", id: "advantage" },
+                { label: "Contact", id: "contact" },
               ].map((item) => (
-                <button
+                <motion.button
                   key={item.id}
+                  whileHover={{ x: 5 }}
                   onClick={() => scrollToSection(item.id)}
                   className="block text-muted-foreground hover:text-primary transition-colors text-left"
                 >
                   {item.label}
-                </button>
+                </motion.button>
               ))}
             </nav>
           </div>
@@ -393,21 +415,27 @@ const Footer: React.FC = () => {
 
               {/* Quick action buttons */}
               <div className="pt-3 flex flex-wrap gap-3">
-                <button
-                  onClick={() => openExternal(REVIEW_URL)}
+                <motion.a
+                  whileHover={{ scale: 1.05 }}
+                  href="https://g.page/r/CVo8voo1GVplEBM/review"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-accent px-4 py-2 text-sm rounded-md"
-                  aria-label="Review Razzaq Automotives on Google (opens in new tab)"
+                  aria-label="Review Razzaq Automotives on Google"
                 >
                   Review Us
-                </button>
+                </motion.a>
 
-                <button
-                  onClick={() => openExternal(MAP_APP_LINK)}
+                <motion.a
+                  whileHover={{ scale: 1.05 }}
+                  href="https://maps.app.goo.gl/iw9V2EXDWC7off1MA"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-glass px-4 py-2 text-sm rounded-md"
-                  aria-label="Open location in maps (opens in new tab)"
+                  aria-label="Open location in maps"
                 >
                   Open in Maps
-                </button>
+                </motion.a>
               </div>
             </div>
           </div>

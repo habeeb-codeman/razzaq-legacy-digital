@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTreasureHunt } from '@/hooks/useTreasureHunt';
 
 interface GalleryItem {
   filename: string;
@@ -16,6 +17,8 @@ interface GalleryItem {
 const Gallery = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [goldenWrenchClicks, setGoldenWrenchClicks] = useState(0);
+  const { updateProgress } = useTreasureHunt();
 
   useEffect(() => {
     fetch('/images/gallery/gallery.json')
@@ -55,7 +58,25 @@ const Gallery = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Product Gallery</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Product Gallery{' '}
+              <span 
+                className="cursor-pointer hover:scale-125 inline-block transition-transform duration-200 select-none"
+                onClick={() => {
+                  setGoldenWrenchClicks(prev => {
+                    const newClicks = prev + 1;
+                    if (newClicks >= 3) {
+                      updateProgress('clue3');
+                      return 0;
+                    }
+                    return newClicks;
+                  });
+                }}
+                title="Find the golden treasure!"
+              >
+                🔧
+              </span>
+            </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Explore our extensive collection of quality heavy vehicle parts and components
             </p>

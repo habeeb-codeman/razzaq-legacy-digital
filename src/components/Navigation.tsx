@@ -150,11 +150,13 @@
 // src/components/Navigation.tsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import razzaqLogo from "@/assets/razzaq-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTreasureHunt } from "@/hooks/useTreasureHunt";
+import TreasureHunt from "./TreasureHunt";
 
 const navItems = [
   { label: "Home", id: "/", isRoute: true },
@@ -168,15 +170,30 @@ const navItems = [
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [showTreasureMap, setShowTreasureMap] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAdmin } = useAuth();
+  const { updateProgress } = useTreasureHunt();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Logo click easter egg
+  useEffect(() => {
+    if (logoClicks >= 5) {
+      updateProgress('clue1');
+      setLogoClicks(0);
+    }
+  }, [logoClicks, updateProgress]);
+
+  const handleLogoClick = () => {
+    setLogoClicks((prev) => prev + 1);
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -218,10 +235,10 @@ const Navigation = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/">
+          <Link to="/" onClick={handleLogoClick}>
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="flex items-center space-x-3"
+              className="flex items-center space-x-3 cursor-pointer"
             >
               <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                 <img
@@ -260,6 +277,16 @@ const Navigation = () => {
                 </button>
               )
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTreasureMap(true)}
+              className="nav-link font-medium gap-2"
+              title="Treasure Hunt Map"
+            >
+              <Map className="w-4 h-4" />
+              <span className="hidden xl:inline">Map</span>
+            </Button>
             {isAdmin && (
               <Link to="/admin" className="nav-link font-medium text-accent">
                 Admin
@@ -338,6 +365,9 @@ const Navigation = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Treasure Hunt Modal */}
+      <TreasureHunt isOpen={showTreasureMap} onClose={() => setShowTreasureMap(false)} />
     </motion.nav>
   );
 };

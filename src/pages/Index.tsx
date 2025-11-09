@@ -9,8 +9,12 @@ import TestimonialsSection from '@/components/TestimonialsSection';
 import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import TruckGame from '@/components/TruckGame';
+import { useEasterEggs } from '@/hooks/useEasterEggs';
 
 const Index = () => {
+  const { showTruckGame, closeTruckGame, onTruckGameWin } = useEasterEggs();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO 
@@ -28,6 +32,11 @@ const Index = () => {
       <TestimonialsSection />
       <ContactSection />
       <Footer />
+      
+      {/* Easter Egg: Truck Game */}
+      {showTruckGame && (
+        <TruckGame onClose={closeTruckGame} onWin={onTruckGameWin} />
+      )}
     </div>
   );
 };
