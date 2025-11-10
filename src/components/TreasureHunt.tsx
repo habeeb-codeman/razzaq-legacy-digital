@@ -17,7 +17,21 @@ export interface ClueProgress {
   clue5: boolean; // Footer secret
 }
 
-const DISCOUNT_CODE = 'RAZZAQ50YEARS';
+// Generate 10 random discount codes
+const DISCOUNT_CODES = [
+  'RZ10-LEGACY76',
+  'TRUCK-MASTER50',
+  'RAZZAQ-VIP24',
+  'FLEET-PRO2026',
+  'GOLDEN-SPARE99',
+  'DIESEL-HERO88',
+  'HIGHWAY-KING77',
+  'CHROME-ELITE66',
+  'ENGINE-WIZRD55',
+  'PARTS-CHAMP44'
+];
+
+const getRandomCode = () => DISCOUNT_CODES[Math.floor(Math.random() * DISCOUNT_CODES.length)];
 
 export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
   const [progress, setProgress] = useState<ClueProgress>({
@@ -29,6 +43,7 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
   });
   const [showReward, setShowReward] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [discountCode, setDiscountCode] = useState('');
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('treasureHuntProgress');
@@ -40,6 +55,8 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
   useEffect(() => {
     const allFound = Object.values(progress).every((v) => v);
     if (allFound && !showReward) {
+      const code = getRandomCode();
+      setDiscountCode(code);
       setShowReward(true);
       toast.success('🎉 Congratulations! You found the treasure!');
     }
@@ -55,15 +72,15 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
     },
     {
       id: 'clue2',
-      title: 'The Classic Code',
-      hint: 'Enter the legendary Konami code: ↑↑↓↓←→←→BA',
-      location: 'Anywhere on the site',
+      title: 'The Scroll Quest',
+      hint: 'Scroll to the very bottom of the homepage and wait 3 seconds',
+      location: 'Homepage Footer',
       found: progress.clue2,
     },
     {
       id: 'clue3',
       title: 'The Hidden Gem',
-      hint: 'Find the golden wrench hidden in the Gallery',
+      hint: 'Click on a secret image in the Gallery (look for something that sparkles)',
       location: 'Gallery Page',
       found: progress.clue3,
     },
@@ -87,7 +104,7 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
   const totalClues = clues.length;
 
   const copyCode = () => {
-    navigator.clipboard.writeText(DISCOUNT_CODE);
+    navigator.clipboard.writeText(discountCode);
     setCopied(true);
     toast.success('Discount code copied!');
     setTimeout(() => setCopied(false), 2000);
@@ -196,12 +213,12 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
                   </h2>
                   <p className="text-lg text-muted-foreground mb-8">
                     Congratulations on completing the 50 Years Treasure Hunt!
-                    Here's your exclusive 5% discount code:
+                    Here's your exclusive 10% discount code:
                   </p>
 
                   <div className="bg-gradient-primary p-8 rounded-2xl mb-6">
                     <div className="text-5xl font-bold text-primary-foreground mb-4 tracking-wider">
-                      {DISCOUNT_CODE}
+                      {discountCode}
                     </div>
                     <Button
                       onClick={copyCode}
@@ -226,7 +243,7 @@ export const TreasureHunt = ({ isOpen, onClose }: TreasureHuntProps) => {
                     <p className="font-semibold mb-2">How to use:</p>
                     <p>
                       Contact us via WhatsApp or phone and mention this code to receive
-                      5% off your purchase. Valid on orders above ₹5,000.
+                      10% off your purchase. Valid on orders above ₹5,000.
                     </p>
                   </div>
                 </motion.div>

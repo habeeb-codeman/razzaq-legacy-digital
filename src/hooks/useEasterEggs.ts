@@ -2,30 +2,41 @@ import { useEffect, useState, useCallback } from 'react';
 import { useTreasureHunt } from './useTreasureHunt';
 
 export const useEasterEggs = () => {
-  const [konamiSequence, setKonamiSequence] = useState<string[]>([]);
   const [typedSequence, setTypedSequence] = useState<string>('');
   const [showTruckGame, setShowTruckGame] = useState(false);
+  const [scrollTimer, setScrollTimer] = useState<NodeJS.Timeout | null>(null);
   const { updateProgress } = useTreasureHunt();
 
-  const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  // Scroll to bottom detection for clue2
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolledToBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 10;
+      
+      if (scrolledToBottom) {
+        // Start 3-second timer
+        const timer = setTimeout(() => {
+          updateProgress('clue2');
+        }, 3000);
+        setScrollTimer(timer);
+      } else {
+        // Clear timer if user scrolls up
+        if (scrollTimer) {
+          clearTimeout(scrollTimer);
+          setScrollTimer(null);
+        }
+      }
+    };
 
-  // Konami Code Easter Egg
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimer) clearTimeout(scrollTimer);
+    };
+  }, [updateProgress, scrollTimer]);
+
+  // Type "truck" to open game
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      setKonamiSequence((prev) => {
-        const newSequence = [...prev, e.key].slice(-10);
-        
-        // Check if konami code is complete
-        const matches = konamiCode.every((key, index) => newSequence[index] === key);
-        if (matches && newSequence.length === konamiCode.length) {
-          updateProgress('clue2');
-          return [];
-        }
-        
-        return newSequence;
-      });
-
-      // Type "truck" to open game
       setTypedSequence((prev) => {
         const newTyped = (prev + e.key).slice(-5).toLowerCase();
         if (newTyped === 'truck') {
@@ -38,7 +49,7 @@ export const useEasterEggs = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [updateProgress]);
+  }, []);
 
   const closeTruckGame = useCallback(() => {
     setShowTruckGame(false);

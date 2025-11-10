@@ -17,8 +17,12 @@ interface GalleryItem {
 const Gallery = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [goldenWrenchClicks, setGoldenWrenchClicks] = useState(0);
   const { updateProgress } = useTreasureHunt();
+
+  // Secret sparkle effect on random image
+  const [secretImageIndex] = useState(() => 
+    Math.floor(Math.random() * 12) // Random image in first 12
+  );
 
   useEffect(() => {
     fetch('/images/gallery/gallery.json')
@@ -32,6 +36,10 @@ const Gallery = () => {
         setLoading(false);
       });
   }, []);
+
+  const handleSecretImageClick = () => {
+    updateProgress('clue3');
+  };
 
   const handleWhatsAppInquiry = (item: GalleryItem) => {
     const phone = '+919876543210'; // Default company phone
@@ -59,23 +67,7 @@ const Gallery = () => {
             className="text-center mb-12"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Product Gallery{' '}
-              <span 
-                className="cursor-pointer hover:scale-125 inline-block transition-transform duration-200 select-none"
-                onClick={() => {
-                  setGoldenWrenchClicks(prev => {
-                    const newClicks = prev + 1;
-                    if (newClicks >= 3) {
-                      updateProgress('clue3');
-                      return 0;
-                    }
-                    return newClicks;
-                  });
-                }}
-                title="Find the golden treasure!"
-              >
-                🔧
-              </span>
+              Product Gallery
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Explore our extensive collection of quality heavy vehicle parts and components
@@ -102,41 +94,78 @@ const Gallery = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
-              {galleryItems.map((item, index) => (
-                <motion.div
-                  key={item.filename}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                >
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group h-full flex flex-col">
-                    <div className="aspect-square overflow-hidden bg-muted">
-                      <img
-                        src={`/images/gallery/${item.filename}`}
-                        alt={item.product_name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardContent className="p-4 flex flex-col flex-1">
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                        {item.product_name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
-                        {item.description}
-                      </p>
-                      <Button
-                        onClick={() => handleWhatsAppInquiry(item)}
-                        className="btn-hero w-full"
-                        size="sm"
+              {galleryItems.map((item, index) => {
+                const isSecretImage = index === secretImageIndex;
+                return (
+                  <motion.div
+                    key={item.filename}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                  >
+                    <Card 
+                      className={`overflow-hidden hover:shadow-lg transition-all duration-300 group h-full flex flex-col ${
+                        isSecretImage ? 'ring-2 ring-accent/30 hover:ring-accent/50' : ''
+                      }`}
+                    >
+                      <div 
+                        className="aspect-square overflow-hidden bg-muted relative"
+                        onClick={isSecretImage ? handleSecretImageClick : undefined}
                       >
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Inquire on WhatsApp
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                        {isSecretImage && (
+                          <>
+                            <div className="absolute top-2 right-2 z-10 text-2xl animate-bounce">
+                              ✨
+                            </div>
+                            <div className="absolute bottom-2 left-2 z-10 text-xl animate-pulse">
+                              ✨
+                            </div>
+                            <motion.div
+                              animate={{
+                                boxShadow: [
+                                  '0 0 20px rgba(var(--accent-rgb), 0.3)',
+                                  '0 0 40px rgba(var(--accent-rgb), 0.6)',
+                                  '0 0 20px rgba(var(--accent-rgb), 0.3)',
+                                ],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                              }}
+                              className="absolute inset-0 pointer-events-none"
+                            />
+                          </>
+                        )}
+                        <img
+                          src={`/images/gallery/${item.filename}`}
+                          alt={item.product_name}
+                          className={`w-full h-full object-cover transition-transform duration-500 ${
+                            isSecretImage ? 'cursor-pointer group-hover:scale-110' : 'group-hover:scale-105'
+                          }`}
+                          loading="lazy"
+                        />
+                      </div>
+                      <CardContent className="p-4 flex flex-col flex-1">
+                        <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                          {item.product_name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
+                          {item.description}
+                        </p>
+                        <Button
+                          onClick={() => handleWhatsAppInquiry(item)}
+                          className="btn-hero w-full"
+                          size="sm"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Inquire on WhatsApp
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
 
