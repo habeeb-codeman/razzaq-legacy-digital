@@ -46,7 +46,7 @@ const BlogPost = () => {
         setPost(data);
         
         // Generate HTML from TipTap JSON
-        const html = generateHTML(data.content, [
+        const html = generateHTML(data.content as any, [
           StarterKit,
           Image,
           LinkExtension,
