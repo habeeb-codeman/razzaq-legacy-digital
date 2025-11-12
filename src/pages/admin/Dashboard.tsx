@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, LogOut, FileText, Receipt } from 'lucide-react';
+import { Package, ShoppingBag, Users, LogOut, FileText, Receipt, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,9 @@ const Dashboard = () => {
     totalProducts: 0,
     publishedProducts: 0,
     draftProducts: 0,
-    totalBills: 0
+    totalBills: 0,
+    totalBlogs: 0,
+    publishedBlogs: 0
   });
 
   useEffect(() => {
@@ -36,11 +38,22 @@ const Dashboard = () => {
       .from('bills')
       .select('*', { count: 'exact', head: true });
 
+    const { count: totalBlogs } = await supabase
+      .from('blog_posts')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: publishedBlogs } = await supabase
+      .from('blog_posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('published', true);
+
     setStats({
       totalProducts: total || 0,
       publishedProducts: published || 0,
       draftProducts: (total || 0) - (published || 0),
-      totalBills: billsCount || 0
+      totalBills: billsCount || 0,
+      totalBlogs: totalBlogs || 0,
+      publishedBlogs: publishedBlogs || 0
     });
   };
 
@@ -89,7 +102,7 @@ const Dashboard = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -97,26 +110,22 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.publishedProducts} published, {stats.draftProducts} drafts
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Published</CardTitle>
-                <ShoppingBag className="h-4 w-4 text-green-500" />
+                <CardTitle className="text-sm font-medium">Blog Posts</CardTitle>
+                <BookOpen className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.publishedProducts}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Drafts</CardTitle>
-                <Users className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.draftProducts}</div>
+                <div className="text-2xl font-bold">{stats.totalBlogs}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.publishedBlogs} published
+                </p>
               </CardContent>
             </Card>
 
@@ -136,7 +145,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link to="/admin/products">
                 <Button className="w-full btn-hero" size="lg">
                   <Package className="w-5 h-5 mr-2" />
@@ -146,6 +155,12 @@ const Dashboard = () => {
               <Link to="/admin/products/new">
                 <Button className="w-full" variant="outline" size="lg">
                   Add New Product
+                </Button>
+              </Link>
+              <Link to="/admin/blog">
+                <Button className="w-full" variant="outline" size="lg">
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Manage Blog
                 </Button>
               </Link>
               <Link to="/admin/bills">

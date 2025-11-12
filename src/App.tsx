@@ -18,6 +18,10 @@ import ProductForm from "./pages/admin/ProductForm";
 import BulkImport from "./pages/admin/BulkImport";
 import Bills from "./pages/admin/Bills";
 import CreateBill from "./pages/admin/CreateBill";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import BlogList from "./pages/admin/BlogList";
+import BlogEditor from "./pages/admin/BlogEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +38,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Product />} />
               <Route path="/gallery" element={<Gallery />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/auth" element={<Auth />} />
               <Route 
                 path="/profile" 
@@ -98,6 +104,30 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <CreateBill />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/blog" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <BlogList />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/blog/new" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <BlogEditor />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/blog/edit/:id" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <BlogEditor />
                   </ProtectedRoute>
                 } 
               />
