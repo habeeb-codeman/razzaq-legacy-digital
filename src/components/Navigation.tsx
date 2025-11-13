@@ -150,8 +150,14 @@
 // src/components/Navigation.tsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Menu, X, User, Map } from "lucide-react";
+import { Menu, X, User, Map, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import razzaqLogo from "@/assets/razzaq-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -160,10 +166,18 @@ import TreasureHunt from "./TreasureHunt";
 
 const navItems = [
   { label: "Home", id: "/", isRoute: true },
-  { label: "Partnerships", id: "partnerships", isRoute: false },
-  { label: "Advantage", id: "advantage", isRoute: false },
+  { 
+    label: "Partnerships", 
+    id: "partnerships", 
+    isRoute: false,
+    dropdown: [
+      { label: "Partnerships", id: "partnerships", isRoute: false },
+      { label: "Advantage", id: "advantage", isRoute: false }
+    ]
+  },
   { label: "Products", id: "/products", isRoute: true },
   { label: "Gallery", id: "/gallery", isRoute: true },
+  { label: "Blogs", id: "/blog", isRoute: true },
   { label: "Contact", id: "contact", isRoute: false },
 ];
 
@@ -259,7 +273,25 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) =>
-              item.isRoute ? (
+              item.dropdown ? (
+                <DropdownMenu key={item.id}>
+                  <DropdownMenuTrigger className="nav-link font-medium flex items-center gap-1 hover:text-accent transition-colors">
+                    {item.label}
+                    <ChevronDown className="w-4 h-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background border-border">
+                    {item.dropdown.map((subItem) => (
+                      <DropdownMenuItem
+                        key={subItem.id}
+                        onClick={() => handleNavClick(subItem)}
+                        className="cursor-pointer hover:bg-muted"
+                      >
+                        {subItem.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : item.isRoute ? (
                 <Link
                   key={item.id}
                   to={item.id}
@@ -336,7 +368,22 @@ const Navigation = () => {
           >
             <div className="flex flex-col space-y-4 pt-4">
               {navItems.map((item) =>
-                item.isRoute ? (
+                item.dropdown ? (
+                  <div key={item.id} className="space-y-2">
+                    <div className="text-left py-2 px-4 font-medium text-muted-foreground">
+                      {item.label}
+                    </div>
+                    {item.dropdown.map((subItem) => (
+                      <button
+                        key={subItem.id}
+                        onClick={() => handleNavClick(subItem)}
+                        className="text-left py-2 px-8 rounded-lg hover:bg-card transition-colors w-full"
+                      >
+                        {subItem.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : item.isRoute ? (
                   <Link
                     key={item.id}
                     to={item.id}
