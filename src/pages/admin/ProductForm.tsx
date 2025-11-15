@@ -310,7 +310,7 @@ const ProductForm = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Pricing & Contact</CardTitle>
+                <CardTitle>Pricing & Inventory</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -327,31 +327,95 @@ const ProductForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Contact Phone</Label>
+                    <Label htmlFor="sku">SKU (Optional)</Label>
                     <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+91 XXXXXXXXXX"
+                      id="sku"
+                      value={formData.sku}
+                      onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                      placeholder="SKU-XXX"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stock_quantity">Stock Quantity *</Label>
+                    <Input
+                      id="stock_quantity"
+                      type="number"
+                      value={formData.stock_quantity}
+                      onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="low_stock_threshold">Low Stock Alert Threshold</Label>
+                    <Input
+                      id="low_stock_threshold"
+                      type="number"
+                      value={formData.low_stock_threshold}
+                      onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+                      placeholder="10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Contact Phone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+91 XXXXXXXXXX"
+                  />
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Categorization</CardTitle>
+                <CardTitle>Warehouse Location & Categorization</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location">Warehouse Location *</Label>
+                  <Select
+                    value={formData.location}
+                    onValueChange={(value) => setFormData({ ...formData, location: value })}
+                    disabled={isEdit}
+                  >
+                    <SelectTrigger id="location">
+                      <SelectValue placeholder="Select warehouse location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RA1">RA1 - Warehouse 1</SelectItem>
+                      <SelectItem value="RA2">RA2 - Warehouse 2</SelectItem>
+                      <SelectItem value="RA3">RA3 - Warehouse 3</SelectItem>
+                      <SelectItem value="RA4">RA4 - Warehouse 4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {!isEdit && (
+                    <p className="text-xs text-muted-foreground">
+                      Product code will be auto-generated based on location (e.g., RA1-00001)
+                    </p>
+                  )}
+                  {isEdit && (
+                    <p className="text-xs text-muted-foreground">
+                      Location cannot be changed after product creation
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select
                     value={formData.category_id}
                     onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="category">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
