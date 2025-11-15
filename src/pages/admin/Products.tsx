@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, Upload } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Upload, Package } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -21,6 +22,9 @@ interface Product {
   price: number | null;
   published: boolean;
   images: any;
+  location: string | null;
+  stock_quantity: number | null;
+  low_stock_threshold: number | null;
   created_at: string;
 }
 
@@ -29,6 +33,8 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [stockFilter, setStockFilter] = useState('all');
 
   useEffect(() => {
     fetchProducts();
@@ -80,10 +86,22 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.product_code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.short_description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesLocation = locationFilter === 'all' || product.location === locationFilter;
+    
+    const matchesStock = 
+      stockFilter === 'all' ||
+      (stockFilter === 'low' && product.stock_quantity !== null && product.low_stock_threshold !== null && product.stock_quantity <= product.low_stock_threshold) ||
+      (stockFilter === 'out' && product.stock_quantity === 0) ||
+      (stockFilter === 'in' && product.stock_quantity !== null && product.stock_quantity > 0);
+    
+    return matchesSearch && matchesLocation && matchesStock;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -116,30 +134,74 @@ const Products = () => {
           className="space-y-6"
         >
           {/* Actions Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search products, codes, descriptions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Link to="/admin/products/bulk-import">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Import
+                  </Button>
+                </Link>
+                <Link to="/admin/products/new">
+                  <Button className="btn-hero w-full sm:w-auto">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Product
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <Link to="/admin/products/bulk-import">
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Import
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="RA1">RA1 - Warehouse 1</SelectItem>
+                  <SelectItem value="RA2">RA2 - Warehouse 2</SelectItem>
+                  <SelectItem value="RA3">RA3 - Warehouse 3</SelectItem>
+                  <SelectItem value="RA4">RA4 - Warehouse 4</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={stockFilter} onValueChange={setStockFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="All Stock Levels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stock Levels</SelectItem>
+                  <SelectItem value="in">In Stock</SelectItem>
+                  <SelectItem value="low">Low Stock</SelectItem>
+                  <SelectItem value="out">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {(locationFilter !== 'all' || stockFilter !== 'all' || searchTerm) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setLocationFilter('all');
+                    setStockFilter('all');
+                    setSearchTerm('');
+                  }}
+                >
+                  Clear Filters
                 </Button>
-              </Link>
-              <Link to="/admin/products/new">
-                <Button className="btn-hero w-full sm:w-auto">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Product
-                </Button>
-              </Link>
+              )}
             </div>
           </div>
 
@@ -160,12 +222,17 @@ const Products = () => {
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                    <div className="flex-1">
+                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-heading font-bold text-lg">{product.name}</h3>
                         <Badge variant={product.published ? "default" : "secondary"}>
                           {product.published ? 'Published' : 'Draft'}
                         </Badge>
+                        {product.location && (
+                          <Badge variant="outline" className="text-xs">
+                            {product.location}
+                          </Badge>
+                        )}
                         {(!product.images || (Array.isArray(product.images) && product.images.length === 0)) && (
                           <Badge variant="outline" className="text-xs">
                             No Images
@@ -176,9 +243,24 @@ const Products = () => {
                       {product.short_description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">{product.short_description}</p>
                       )}
-                      {product.price && (
-                        <p className="text-accent font-semibold mt-2">₹{product.price.toLocaleString()}</p>
-                      )}
+                      <div className="flex items-center gap-3 mt-2">
+                        {product.price && (
+                          <p className="text-accent font-semibold">₹{product.price.toLocaleString()}</p>
+                        )}
+                        {product.stock_quantity !== null && (
+                          <Badge 
+                            variant={
+                              product.stock_quantity === 0 ? "destructive" :
+                              product.stock_quantity <= (product.low_stock_threshold || 10) ? "secondary" :
+                              "default"
+                            }
+                          >
+                            {product.stock_quantity === 0 ? "Out of Stock" :
+                             product.stock_quantity <= (product.low_stock_threshold || 10) ? `Low: ${product.stock_quantity}` :
+                             `Stock: ${product.stock_quantity}`}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex gap-2 w-full md:w-auto">
