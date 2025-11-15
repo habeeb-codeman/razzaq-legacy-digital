@@ -37,6 +37,10 @@ const ProductForm = () => {
     phone: '',
     category_id: '',
     tags: '',
+    location: '',
+    stock_quantity: '',
+    low_stock_threshold: '10',
+    sku: '',
     published: false,
   });
   const [images, setImages] = useState<File[]>([]);
@@ -79,6 +83,10 @@ const ProductForm = () => {
         phone: data.phone || '',
         category_id: data.category_id || '',
         tags: Array.isArray(data.tags) ? data.tags.join(', ') : '',
+        location: data.location || '',
+        stock_quantity: data.stock_quantity?.toString() || '0',
+        low_stock_threshold: data.low_stock_threshold?.toString() || '10',
+        sku: data.sku || '',
         published: data.published,
       });
       const imageUrls = Array.isArray(data.images) ? data.images.filter((img): img is string => typeof img === 'string') : [];
@@ -151,6 +159,11 @@ const ProductForm = () => {
       return;
     }
 
+    if (!isEdit && !formData.location) {
+      toast.error('Please select a warehouse location');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -160,12 +173,19 @@ const ProductForm = () => {
 
       // Generate product code if creating new product
       let productCode = '';
-      if (!isEdit) {
-        const { data: codeData } = await supabase.rpc('generate_product_code');
-        productCode = codeData || `PRD-${Date.now()}`;
+      if (!isEdit && formData.location) {
+        const { data: codeData, error: codeError } = await supabase
+          .rpc('generate_product_code', { p_location: formData.location });
+        
+        if (codeError) {
+          toast.error('Failed to generate product code');
+          setLoading(false);
+          return;
+        }
+        productCode = codeData;
       }
 
-      const productData = {
+      const productData: any = {
         name: formData.name,
         slug: formData.slug,
         short_description: formData.short_description || null,
@@ -176,10 +196,10 @@ const ProductForm = () => {
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
         published: formData.published,
         images: allImageUrls,
-        ...(!isEdit && { 
-          product_code: productCode,
-          created_by: user?.id 
-        }),
+        location: formData.location || null,
+        stock_quantity: formData.stock_quantity ? parseInt(formData.stock_quantity) : 0,
+        low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : 10,
+        sku: formData.sku || null,
       };
 
       if (isEdit) {
@@ -191,6 +211,9 @@ const ProductForm = () => {
         if (error) throw error;
         toast.success('Product updated successfully!');
       } else {
+        productData.product_code = productCode;
+        productData.created_by = user?.id;
+
         const { error } = await supabase
           .from('products')
           .insert(productData);

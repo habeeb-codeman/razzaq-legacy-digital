@@ -25,6 +25,8 @@ interface Product {
   price: number | null;
   tags: string[] | null;
   category_id: string | null;
+  location: string | null;
+  stock_quantity: number | null;
   published: boolean;
 }
 
@@ -40,6 +42,10 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  const [priceFilter, setPriceFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -102,7 +108,7 @@ const Product = () => {
     setLoading(false);
   };
 
-  const filteredProducts = products.filter(product => {
+  let filteredProducts = products.filter(product => {
     const matchesSearch = 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,7 +118,36 @@ const Product = () => {
     const matchesCategory = 
       selectedCategory === 'all' || product.category_id === selectedCategory;
 
-    return matchesSearch && matchesCategory;
+    const matchesLocation = 
+      selectedLocation === 'all' || product.location === selectedLocation;
+
+    const matchesPrice = 
+      priceFilter === 'all' ||
+      (priceFilter === 'low' && product.price && product.price < 5000) ||
+      (priceFilter === 'mid' && product.price && product.price >= 5000 && product.price < 20000) ||
+      (priceFilter === 'high' && product.price && product.price >= 20000);
+
+    const matchesStock = 
+      stockFilter === 'all' ||
+      (stockFilter === 'in' && product.stock_quantity !== null && product.stock_quantity > 0) ||
+      (stockFilter === 'out' && product.stock_quantity === 0);
+
+    return matchesSearch && matchesCategory && matchesLocation && matchesPrice && matchesStock;
+  });
+
+  // Apply sorting
+  filteredProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return (a.price || 0) - (b.price || 0);
+      case 'price-high':
+        return (b.price || 0) - (a.price || 0);
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'newest':
+      default:
+        return 0; // Already sorted by created_at desc from fetch
+    }
   });
 
   const handleWhatsAppInquiry = (product: Product) => {
@@ -247,20 +282,33 @@ const Product = () => {
                       )}
                       
                       {/* Product Code Badge */}
-                      <div className="absolute top-3 left-3">
+                      <div className="absolute top-3 left-3 flex flex-col gap-1">
                         <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
                           {product.product_code}
                         </Badge>
+                        {product.location && (
+                          <Badge variant="outline" className="bg-background/90 backdrop-blur-sm text-xs">
+                            {product.location}
+                          </Badge>
+                        )}
                       </div>
 
-                      {/* Price Badge */}
-                      {product.price && (
-                        <div className="absolute top-3 right-3">
+                      {/* Price & Stock Badges */}
+                      <div className="absolute top-3 right-3 flex flex-col gap-1 items-end">
+                        {product.price && (
                           <Badge className="bg-accent text-accent-foreground">
                             ₹{product.price.toLocaleString()}
                           </Badge>
-                        </div>
-                      )}
+                        )}
+                        {product.stock_quantity !== null && (
+                          <Badge 
+                            variant={product.stock_quantity > 0 ? "default" : "destructive"}
+                            className="text-xs"
+                          >
+                            {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
                     {/* Product Info */}

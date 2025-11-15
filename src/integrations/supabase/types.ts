@@ -235,13 +235,17 @@ export type Database = {
           description: string | null
           id: string
           images: Json | null
+          location: Database["public"]["Enums"]["product_location"] | null
+          low_stock_threshold: number | null
           name: string
           phone: string | null
           price: number | null
           product_code: string
           published: boolean
           short_description: string | null
+          sku: string | null
           slug: string
+          stock_quantity: number | null
           tags: string[] | null
           updated_at: string
         }
@@ -252,13 +256,17 @@ export type Database = {
           description?: string | null
           id?: string
           images?: Json | null
+          location?: Database["public"]["Enums"]["product_location"] | null
+          low_stock_threshold?: number | null
           name: string
           phone?: string | null
           price?: number | null
           product_code: string
           published?: boolean
           short_description?: string | null
+          sku?: string | null
           slug: string
+          stock_quantity?: number | null
           tags?: string[] | null
           updated_at?: string
         }
@@ -269,13 +277,17 @@ export type Database = {
           description?: string | null
           id?: string
           images?: Json | null
+          location?: Database["public"]["Enums"]["product_location"] | null
+          low_stock_threshold?: number | null
           name?: string
           phone?: string | null
           price?: number | null
           product_code?: string
           published?: boolean
           short_description?: string | null
+          sku?: string | null
           slug?: string
+          stock_quantity?: number | null
           tags?: string[] | null
           updated_at?: string
         }
@@ -316,7 +328,9 @@ export type Database = {
     }
     Functions: {
       generate_bill_number: { Args: never; Returns: string }
-      generate_product_code: { Args: never; Returns: string }
+      generate_product_code:
+        | { Args: { p_location: string }; Returns: string }
+        | { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -327,6 +341,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      product_location: "RA1" | "RA2" | "RA3" | "RA4"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -455,6 +470,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      product_location: ["RA1", "RA2", "RA3", "RA4"],
     },
   },
 } as const
