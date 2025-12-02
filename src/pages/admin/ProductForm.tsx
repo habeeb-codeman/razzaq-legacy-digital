@@ -385,7 +385,6 @@ const ProductForm = () => {
                   <Select
                     value={formData.location}
                     onValueChange={(value) => setFormData({ ...formData, location: value })}
-                    disabled={isEdit}
                   >
                     <SelectTrigger id="location">
                       <SelectValue placeholder="Select warehouse location" />
@@ -400,11 +399,6 @@ const ProductForm = () => {
                   {!isEdit && (
                     <p className="text-xs text-muted-foreground">
                       Product code will be auto-generated based on location (e.g., RA1-00001)
-                    </p>
-                  )}
-                  {isEdit && (
-                    <p className="text-xs text-muted-foreground">
-                      Location cannot be changed after product creation
                     </p>
                   )}
                 </div>
