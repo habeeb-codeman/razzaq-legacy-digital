@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, Upload, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Upload, Package, MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -151,6 +151,12 @@ const Products = () => {
                   <Button variant="outline" className="w-full sm:w-auto">
                     <Upload className="w-4 h-4 mr-2" />
                     Bulk Import
+                  </Button>
+                </Link>
+                <Link to="/admin/products/bulk-location-update">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Bulk Location Update
                   </Button>
                 </Link>
                 <Link to="/admin/products/new">

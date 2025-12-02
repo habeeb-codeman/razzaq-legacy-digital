@@ -227,6 +227,44 @@ export type Database = {
         }
         Relationships: []
       }
+      product_location_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_location: Database["public"]["Enums"]["product_location"]
+          notes: string | null
+          old_location: Database["public"]["Enums"]["product_location"] | null
+          product_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_location: Database["public"]["Enums"]["product_location"]
+          notes?: string | null
+          old_location?: Database["public"]["Enums"]["product_location"] | null
+          product_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_location?: Database["public"]["Enums"]["product_location"]
+          notes?: string | null
+          old_location?: Database["public"]["Enums"]["product_location"] | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_location_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_id: string | null
