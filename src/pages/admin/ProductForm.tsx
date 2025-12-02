@@ -61,6 +61,8 @@ const ProductForm = () => {
     setCategories(data || []);
   };
 
+  const [originalLocation, setOriginalLocation] = useState<string>('');
+
   const fetchProduct = async () => {
     if (!id) return;
 
@@ -89,6 +91,7 @@ const ProductForm = () => {
         sku: data.sku || '',
         published: data.published,
       });
+      setOriginalLocation(data.location || '');
       const imageUrls = Array.isArray(data.images) ? data.images.filter((img): img is string => typeof img === 'string') : [];
       setExistingImages(imageUrls);
     }
@@ -203,6 +206,22 @@ const ProductForm = () => {
       };
 
       if (isEdit) {
+        // Track location change history if location was changed
+        if (formData.location && originalLocation && formData.location !== originalLocation) {
+          const { error: historyError } = await supabase
+            .from('product_location_history')
+            .insert([{
+              product_id: id,
+              old_location: originalLocation as 'RA1' | 'RA2' | 'RA3' | 'RA4',
+              new_location: formData.location as 'RA1' | 'RA2' | 'RA3' | 'RA4',
+              changed_by: user?.id,
+            }]);
+          
+          if (historyError) {
+            console.error('Failed to record location history:', historyError);
+          }
+        }
+
         const { error } = await supabase
           .from('products')
           .update(productData)

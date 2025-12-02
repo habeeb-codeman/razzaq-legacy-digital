@@ -16,6 +16,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import BulkImport from "./pages/admin/BulkImport";
+import BulkLocationUpdate from "./pages/admin/BulkLocationUpdate";
 import Bills from "./pages/admin/Bills";
 import CreateBill from "./pages/admin/CreateBill";
 import Blog from "./pages/Blog";
@@ -88,6 +89,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <BulkImport />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products/bulk-location-update" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <BulkLocationUpdate />
                   </ProtectedRoute>
                 } 
               />
