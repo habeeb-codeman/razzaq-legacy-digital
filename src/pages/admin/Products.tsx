@@ -156,7 +156,13 @@ const Products = () => {
                 <Link to="/admin/products/bulk-location-update">
                   <Button variant="outline" className="w-full sm:w-auto">
                     <MapPin className="w-4 h-4 mr-2" />
-                    Bulk Location Update
+                    Bulk Location
+                  </Button>
+                </Link>
+                <Link to="/admin/products/qr-labels">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Package className="w-4 h-4 mr-2" />
+                    QR Labels
                   </Button>
                 </Link>
                 <Link to="/admin/products/new">
