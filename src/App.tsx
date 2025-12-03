@@ -19,6 +19,7 @@ import BulkImport from "./pages/admin/BulkImport";
 import BulkLocationUpdate from "./pages/admin/BulkLocationUpdate";
 import QRLabels from "./pages/admin/QRLabels";
 import QRScanner from "./pages/QRScanner";
+import InventoryAnalytics from "./pages/admin/InventoryAnalytics";
 import Bills from "./pages/admin/Bills";
 import CreateBill from "./pages/admin/CreateBill";
 import Blog from "./pages/Blog";
@@ -112,9 +113,13 @@ const App = () => (
               />
               <Route 
                 path="/qr-scanner" 
+                element={<QRScanner />} 
+              />
+              <Route 
+                path="/admin/inventory-analytics" 
                 element={
                   <ProtectedRoute requireAdmin>
-                    <QRScanner />
+                    <InventoryAnalytics />
                   </ProtectedRoute>
                 } 
               />

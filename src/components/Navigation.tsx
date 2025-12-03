@@ -402,6 +402,42 @@ const Navigation = () => {
                   </button>
                 )
               )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors text-accent font-medium"
+                >
+                  Admin
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/qr-scanner"
+                  onClick={() => setIsOpen(false)}
+                  className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors"
+                >
+                  QR Scanner
+                </Link>
+              )}
+              {user ? (
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Account
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsOpen(false)}
+                  className="text-left py-2 px-4 rounded-lg hover:bg-card transition-colors"
+                >
+                  Login
+                </Link>
+              )}
               <Button
                 onClick={() => handleNavClick({ label: "Get Quote", id: "contact", isRoute: false })}
                 className="btn-hero mx-4 mt-2"

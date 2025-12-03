@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, LogOut, FileText, Receipt, BookOpen } from 'lucide-react';
+import { Package, ShoppingBag, Users, LogOut, FileText, Receipt, BookOpen, BarChart3, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -145,16 +145,23 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link to="/admin/products">
                 <Button className="w-full btn-hero" size="lg">
                   <Package className="w-5 h-5 mr-2" />
                   Manage Products
                 </Button>
               </Link>
-              <Link to="/admin/products/new">
+              <Link to="/admin/inventory-analytics">
                 <Button className="w-full" variant="outline" size="lg">
-                  Add New Product
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  Inventory Analytics
+                </Button>
+              </Link>
+              <Link to="/qr-scanner">
+                <Button className="w-full" variant="outline" size="lg">
+                  <QrCode className="w-5 h-5 mr-2" />
+                  QR Scanner
                 </Button>
               </Link>
               <Link to="/admin/blog">
@@ -167,6 +174,11 @@ const Dashboard = () => {
                 <Button className="w-full" variant="outline" size="lg">
                   <FileText className="w-5 h-5 mr-2" />
                   Billing System
+                </Button>
+              </Link>
+              <Link to="/admin/products/new">
+                <Button className="w-full" variant="outline" size="lg">
+                  Add New Product
                 </Button>
               </Link>
             </CardContent>
