@@ -282,15 +282,10 @@ const Product = () => {
                       )}
                       
                       {/* Product Code Badge */}
-                      <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      <div className="absolute top-3 left-3">
                         <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
                           {product.product_code}
                         </Badge>
-                        {product.location && (
-                          <Badge variant="outline" className="bg-background/90 backdrop-blur-sm text-xs">
-                            {product.location}
-                          </Badge>
-                        )}
                       </div>
 
                       {/* Price & Stock Badges */}

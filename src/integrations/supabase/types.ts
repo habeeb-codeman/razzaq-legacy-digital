@@ -271,6 +271,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          flagged_at: string | null
+          flagged_by: string | null
           id: string
           images: Json | null
           location: Database["public"]["Enums"]["product_location"] | null
@@ -280,9 +282,11 @@ export type Database = {
           price: number | null
           product_code: string
           published: boolean
+          review_notes: string | null
           short_description: string | null
           sku: string | null
           slug: string
+          status: string
           stock_quantity: number | null
           tags: string[] | null
           updated_at: string
@@ -292,6 +296,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           id?: string
           images?: Json | null
           location?: Database["public"]["Enums"]["product_location"] | null
@@ -301,9 +307,11 @@ export type Database = {
           price?: number | null
           product_code: string
           published?: boolean
+          review_notes?: string | null
           short_description?: string | null
           sku?: string | null
           slug: string
+          status?: string
           stock_quantity?: number | null
           tags?: string[] | null
           updated_at?: string
@@ -313,6 +321,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           id?: string
           images?: Json | null
           location?: Database["public"]["Enums"]["product_location"] | null
@@ -322,9 +332,11 @@ export type Database = {
           price?: number | null
           product_code?: string
           published?: boolean
+          review_notes?: string | null
           short_description?: string | null
           sku?: string | null
           slug?: string
+          status?: string
           stock_quantity?: number | null
           tags?: string[] | null
           updated_at?: string
@@ -335,6 +347,56 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scan_history: {
+        Row: {
+          action: string
+          id: string
+          new_location: string | null
+          new_stock: number | null
+          notes: string | null
+          old_location: string | null
+          old_stock: number | null
+          product_id: string
+          quantity_change: number | null
+          scanned_at: string
+          scanned_by: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          new_location?: string | null
+          new_stock?: number | null
+          notes?: string | null
+          old_location?: string | null
+          old_stock?: number | null
+          product_id: string
+          quantity_change?: number | null
+          scanned_at?: string
+          scanned_by?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          new_location?: string | null
+          new_stock?: number | null
+          notes?: string | null
+          old_location?: string | null
+          old_stock?: number | null
+          product_id?: string
+          quantity_change?: number | null
+          scanned_at?: string
+          scanned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

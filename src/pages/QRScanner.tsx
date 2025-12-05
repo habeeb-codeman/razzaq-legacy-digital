@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -19,7 +19,11 @@ import {
   Tag,
   DollarSign,
   Clock,
-  Hash
+  Hash,
+  Flag,
+  AlertTriangle,
+  History,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +32,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -54,7 +59,54 @@ interface Product {
   tags: string[] | null;
   created_at: string;
   updated_at: string;
+  status: string;
+  review_notes: string | null;
 }
+
+interface ScanHistoryItem {
+  id: string;
+  action: string;
+  quantity_change: number | null;
+  old_stock: number | null;
+  new_stock: number | null;
+  notes: string | null;
+  scanned_at: string;
+}
+
+// Audio feedback functions
+const playSound = (type: 'success' | 'error' | 'action') => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  switch (type) {
+    case 'success':
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+      break;
+    case 'error':
+      oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.4);
+      break;
+    case 'action':
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.15);
+      break;
+  }
+};
 
 const QRScanner = () => {
   const navigate = useNavigate();
@@ -65,7 +117,9 @@ const QRScanner = () => {
   const [stockChange, setStockChange] = useState('');
   const [newLocation, setNewLocation] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location'>('info');
+  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location' | 'flag' | 'history'>('info');
+  const [flagNote, setFlagNote] = useState('');
+  const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const scannerInitializedRef = useRef(false);
 
@@ -77,6 +131,46 @@ const QRScanner = () => {
       }
     };
   }, []);
+
+  // Fetch scan history when product changes
+  const fetchScanHistory = useCallback(async (productId: string) => {
+    const { data, error } = await supabase
+      .from('scan_history')
+      .select('*')
+      .eq('product_id', productId)
+      .order('scanned_at', { ascending: false })
+      .limit(20);
+
+    if (!error && data) {
+      setScanHistory(data);
+    }
+  }, []);
+
+  // Record scan action
+  const recordScanAction = async (
+    action: 'view' | 'sold' | 'stock_up' | 'location_change' | 'flag' | 'unflag',
+    details?: {
+      quantity_change?: number;
+      old_stock?: number;
+      new_stock?: number;
+      old_location?: string;
+      new_location?: string;
+      notes?: string;
+    }
+  ) => {
+    if (!product || !user) return;
+
+    try {
+      await supabase.from('scan_history').insert({
+        product_id: product.id,
+        scanned_by: user.id,
+        action,
+        ...details,
+      });
+    } catch (error) {
+      console.error('Failed to record scan action:', error);
+    }
+  };
 
   // Show login prompt if not authenticated
   if (!user) {
@@ -140,7 +234,6 @@ const QRScanner = () => {
 
   const startScanning = async () => {
     try {
-      // Create new instance each time
       html5QrCodeRef.current = new Html5Qrcode("qr-reader");
       scannerInitializedRef.current = true;
       
@@ -158,7 +251,6 @@ const QRScanner = () => {
             const qrData = JSON.parse(decodedText) as QRData;
             setScannedData(qrData);
             
-            // Fetch full product details
             const { data, error } = await supabase
               .from('products')
               .select('*')
@@ -168,32 +260,41 @@ const QRScanner = () => {
             if (error) throw error;
             
             if (!data) {
+              playSound('error');
               toast.error('Product not found in database');
               return;
             }
             
             setProduct(data);
+            fetchScanHistory(data.id);
             
-            // Stop scanner after successful scan
+            // Record view action
+            await supabase.from('scan_history').insert({
+              product_id: data.id,
+              scanned_by: user?.id,
+              action: 'view',
+            });
+            
             if (html5QrCodeRef.current) {
               await html5QrCodeRef.current.stop();
               scannerInitializedRef.current = false;
             }
             setScanning(false);
+            playSound('success');
             toast.success('Product scanned successfully!');
           } catch (e) {
             console.error('QR Parse error:', e);
+            playSound('error');
             toast.error('Invalid QR code format');
           }
         },
-        () => {
-          // Ignore scanning errors (just means no QR code detected yet)
-        }
+        () => {}
       );
       
       setScanning(true);
     } catch (err) {
       console.error('Error starting scanner:', err);
+      playSound('error');
       toast.error('Failed to start camera. Please check permissions.');
       setScanning(false);
     }
@@ -217,7 +318,8 @@ const QRScanner = () => {
 
     setLoading(true);
     try {
-      const newStock = Math.max(0, (product.stock_quantity || 0) - quantity);
+      const oldStock = product.stock_quantity || 0;
+      const newStock = Math.max(0, oldStock - quantity);
 
       const { error } = await supabase
         .from('products')
@@ -226,10 +328,19 @@ const QRScanner = () => {
 
       if (error) throw error;
 
+      await recordScanAction('sold', {
+        quantity_change: -quantity,
+        old_stock: oldStock,
+        new_stock: newStock,
+      });
+
       setProduct({ ...product, stock_quantity: newStock });
+      playSound('action');
       toast.success(`Sold ${quantity} unit${quantity > 1 ? 's' : ''} - Stock: ${newStock}`);
+      fetchScanHistory(product.id);
     } catch (error: any) {
       console.error('Error updating stock:', error);
+      playSound('error');
       toast.error('Failed to update stock');
     } finally {
       setLoading(false);
@@ -241,7 +352,8 @@ const QRScanner = () => {
 
     setLoading(true);
     try {
-      const newStock = (product.stock_quantity || 0) + quantity;
+      const oldStock = product.stock_quantity || 0;
+      const newStock = oldStock + quantity;
 
       const { error } = await supabase
         .from('products')
@@ -250,10 +362,19 @@ const QRScanner = () => {
 
       if (error) throw error;
 
+      await recordScanAction('stock_up', {
+        quantity_change: quantity,
+        old_stock: oldStock,
+        new_stock: newStock,
+      });
+
       setProduct({ ...product, stock_quantity: newStock });
+      playSound('action');
       toast.success(`Stocked up ${quantity} unit${quantity > 1 ? 's' : ''} - Stock: ${newStock}`);
+      fetchScanHistory(product.id);
     } catch (error: any) {
       console.error('Error updating stock:', error);
+      playSound('error');
       toast.error('Failed to update stock');
     } finally {
       setLoading(false);
@@ -271,7 +392,8 @@ const QRScanner = () => {
         return;
       }
       
-      const newStock = Math.max(0, (product.stock_quantity || 0) + change);
+      const oldStock = product.stock_quantity || 0;
+      const newStock = Math.max(0, oldStock + change);
 
       const { error } = await supabase
         .from('products')
@@ -280,11 +402,20 @@ const QRScanner = () => {
 
       if (error) throw error;
 
+      await recordScanAction(change > 0 ? 'stock_up' : 'sold', {
+        quantity_change: change,
+        old_stock: oldStock,
+        new_stock: newStock,
+      });
+
       setProduct({ ...product, stock_quantity: newStock });
       setStockChange('');
-      toast.success(`Stock updated: ${product.stock_quantity} → ${newStock}`);
+      playSound('action');
+      toast.success(`Stock updated: ${oldStock} → ${newStock}`);
+      fetchScanHistory(product.id);
     } catch (error: any) {
       console.error('Error updating stock:', error);
+      playSound('error');
       toast.error('Failed to update stock');
     } finally {
       setLoading(false);
@@ -305,7 +436,6 @@ const QRScanner = () => {
 
       if (updateError) throw updateError;
 
-      // Record location history
       const { error: historyError } = await supabase
         .from('product_location_history')
         .insert([{
@@ -320,12 +450,61 @@ const QRScanner = () => {
         console.error('Failed to record history:', historyError);
       }
 
+      await recordScanAction('location_change', {
+        old_location: oldLocation || undefined,
+        new_location: newLocation,
+      });
+
       setProduct({ ...product, location: newLocation });
       setNewLocation('');
+      playSound('action');
       toast.success(`Location: ${oldLocation || 'None'} → ${newLocation}`);
+      fetchScanHistory(product.id);
     } catch (error: any) {
       console.error('Error updating location:', error);
+      playSound('error');
       toast.error('Failed to update location');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFlagProduct = async () => {
+    if (!product) return;
+
+    setLoading(true);
+    try {
+      const newStatus = product.status === 'under_review' ? 'available' : 'under_review';
+      
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          status: newStatus,
+          review_notes: newStatus === 'under_review' ? flagNote : null,
+          flagged_at: newStatus === 'under_review' ? new Date().toISOString() : null,
+          flagged_by: newStatus === 'under_review' ? user?.id : null,
+        })
+        .eq('id', product.id);
+
+      if (error) throw error;
+
+      await recordScanAction(newStatus === 'under_review' ? 'flag' : 'unflag', {
+        notes: flagNote || undefined,
+      });
+
+      setProduct({ 
+        ...product, 
+        status: newStatus,
+        review_notes: newStatus === 'under_review' ? flagNote : null,
+      });
+      setFlagNote('');
+      playSound('action');
+      toast.success(newStatus === 'under_review' ? 'Product flagged for review' : 'Product cleared from review');
+      fetchScanHistory(product.id);
+    } catch (error: any) {
+      console.error('Error flagging product:', error);
+      playSound('error');
+      toast.error('Failed to update product status');
     } finally {
       setLoading(false);
     }
@@ -337,6 +516,8 @@ const QRScanner = () => {
     setActivePanel('info');
     setStockChange('');
     setNewLocation('');
+    setFlagNote('');
+    setScanHistory([]);
   };
 
   const getStockStatus = (): { color: 'default' | 'destructive' | 'secondary'; text: string } => {
@@ -349,11 +530,34 @@ const QRScanner = () => {
     return { color: 'default', text: 'In Stock' };
   };
 
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'sold': return <ShoppingCart className="w-4 h-4 text-destructive" />;
+      case 'stock_up': return <PackagePlus className="w-4 h-4 text-green-500" />;
+      case 'location_change': return <MapPin className="w-4 h-4 text-blue-500" />;
+      case 'flag': return <Flag className="w-4 h-4 text-orange-500" />;
+      case 'unflag': return <Check className="w-4 h-4 text-green-500" />;
+      case 'view': return <QrCode className="w-4 h-4 text-muted-foreground" />;
+      default: return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const formatActionText = (item: ScanHistoryItem) => {
+    switch (item.action) {
+      case 'sold': return `Sold ${Math.abs(item.quantity_change || 0)} units`;
+      case 'stock_up': return `Stocked up ${item.quantity_change || 0} units`;
+      case 'location_change': return `Moved to ${item.new_stock}`;
+      case 'flag': return 'Flagged for review';
+      case 'unflag': return 'Cleared from review';
+      case 'view': return 'Scanned';
+      default: return item.action;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <SEO title="QR Scanner - Inventory Management" />
 
-      {/* Mobile-optimized Header */}
       <header className="bg-card/80 backdrop-blur-md border-b border-border/30 sticky top-0 z-50">
         <div className="px-4 py-3 safe-area-inset">
           <div className="flex items-center justify-between">
@@ -385,7 +589,6 @@ const QRScanner = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-4"
             >
-              {/* Scanner View - Made larger */}
               <Card className="overflow-hidden border-accent/20">
                 <CardContent className="p-0">
                   <div 
@@ -396,7 +599,6 @@ const QRScanner = () => {
                 </CardContent>
               </Card>
               
-              {/* Scanner Controls */}
               <div className="space-y-3">
                 {!scanning ? (
                   <Button
@@ -448,11 +650,28 @@ const QRScanner = () => {
                       <h2 className="text-xl font-bold truncate">{product?.name}</h2>
                       <p className="text-sm text-muted-foreground font-mono mt-1">{product?.product_code}</p>
                     </div>
-                    <Badge variant={getStockStatus().color} className="ml-3 flex-shrink-0">
-                      {getStockStatus().text}
-                    </Badge>
+                    <div className="flex flex-col gap-1 ml-3 items-end">
+                      <Badge variant={getStockStatus().color}>
+                        {getStockStatus().text}
+                      </Badge>
+                      {product?.status === 'under_review' && (
+                        <Badge variant="outline" className="border-orange-500 text-orange-500">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          Under Review
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
+                
+                {/* Review Notes if flagged */}
+                {product?.status === 'under_review' && product.review_notes && (
+                  <div className="px-4 py-2 bg-orange-500/10 border-t border-orange-500/20">
+                    <p className="text-xs text-orange-600 dark:text-orange-400">
+                      <strong>Review Note:</strong> {product.review_notes}
+                    </p>
+                  </div>
+                )}
                 
                 {/* Stock Display */}
                 <div className="p-4 bg-card">
@@ -492,275 +711,338 @@ const QRScanner = () => {
                 </Button>
               </div>
 
-              {/* Bulk Quick Actions */}
-              <div className="grid grid-cols-4 gap-2">
-                <Button 
-                  onClick={() => handleQuickSold(5)}
-                  disabled={loading || (product?.stock_quantity || 0) < 5}
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 rounded-xl text-destructive hover:bg-destructive/10"
-                >
-                  -5
-                </Button>
-                <Button 
-                  onClick={() => handleQuickSold(10)}
-                  disabled={loading || (product?.stock_quantity || 0) < 10}
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 rounded-xl text-destructive hover:bg-destructive/10"
-                >
-                  -10
-                </Button>
-                <Button 
-                  onClick={() => handleQuickStockUp(5)}
-                  disabled={loading}
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 rounded-xl text-green-500 hover:bg-green-500/10"
-                >
-                  +5
-                </Button>
-                <Button 
-                  onClick={() => handleQuickStockUp(10)}
-                  disabled={loading}
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 rounded-xl text-green-500 hover:bg-green-500/10"
-                >
-                  +10
-                </Button>
-              </div>
-
               {/* Panel Tabs */}
-              <div className="flex gap-2 bg-muted/50 p-1 rounded-2xl">
-                <Button
-                  variant={activePanel === 'info' ? 'default' : 'ghost'}
-                  onClick={() => setActivePanel('info')}
-                  className="flex-1 rounded-xl"
-                  size="sm"
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  Details
-                </Button>
-                <Button
-                  variant={activePanel === 'stock' ? 'default' : 'ghost'}
-                  onClick={() => setActivePanel('stock')}
-                  className="flex-1 rounded-xl"
-                  size="sm"
-                >
-                  <Boxes className="w-4 h-4 mr-2" />
-                  Custom
-                </Button>
-                <Button
-                  variant={activePanel === 'location' ? 'default' : 'ghost'}
-                  onClick={() => setActivePanel('location')}
-                  className="flex-1 rounded-xl"
-                  size="sm"
-                >
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Move
-                </Button>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {[
+                  { id: 'info', icon: Package, label: 'Info' },
+                  { id: 'stock', icon: Boxes, label: 'Stock' },
+                  { id: 'location', icon: MapPin, label: 'Move' },
+                  { id: 'flag', icon: Flag, label: 'Flag' },
+                  { id: 'history', icon: History, label: 'History' },
+                ].map(({ id, icon: Icon, label }) => (
+                  <Button
+                    key={id}
+                    variant={activePanel === id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActivePanel(id as any)}
+                    className="rounded-xl flex-shrink-0"
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {label}
+                  </Button>
+                ))}
               </div>
 
-              {/* Panel Content */}
-              <Card className="border-border/30">
-                <CardContent className="pt-4">
-                  <AnimatePresence mode="wait">
-                    {/* Info Panel */}
-                    {activePanel === 'info' && (
-                      <motion.div
-                        key="info"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="space-y-4"
-                      >
-                        {/* Location */}
-                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                            <MapPin className="w-5 h-5 text-accent" />
+              {/* Info Panel */}
+              <AnimatePresence mode="wait">
+                {activePanel === 'info' && (
+                  <motion.div
+                    key="info"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
+                            <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] text-muted-foreground uppercase">Location</p>
+                              <p className="font-medium truncate">{product?.location || 'N/A'}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Location</p>
-                            <p className="font-semibold">{product?.location || 'Not assigned'}</p>
+                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
+                            <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] text-muted-foreground uppercase">Price</p>
+                              <p className="font-medium truncate">
+                                {product?.price ? `₹${product.price.toLocaleString()}` : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
+                            <Hash className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] text-muted-foreground uppercase">SKU</p>
+                              <p className="font-medium truncate">{product?.sku || 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
+                            <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] text-muted-foreground uppercase">Updated</p>
+                              <p className="font-medium truncate text-xs">
+                                {product?.updated_at ? new Date(product.updated_at).toLocaleDateString() : 'N/A'}
+                              </p>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Price */}
-                        {product?.price && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                            <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-5 h-5 text-green-500" />
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Price</p>
-                              <p className="font-semibold">₹{product.price.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* SKU */}
-                        {product?.sku && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                            <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                              <Hash className="w-5 h-5 text-blue-500" />
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">SKU</p>
-                              <p className="font-semibold font-mono">{product.sku}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Description */}
                         {product?.short_description && (
                           <div className="p-3 bg-muted/30 rounded-xl">
-                            <p className="text-xs text-muted-foreground mb-1">Description</p>
+                            <p className="text-[10px] text-muted-foreground uppercase mb-1">Description</p>
                             <p className="text-sm">{product.short_description}</p>
                           </div>
                         )}
 
-                        {/* Tags */}
                         {product?.tags && product.tags.length > 0 && (
-                          <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
-                            <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Tag className="w-5 h-5 text-purple-500" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-xs text-muted-foreground mb-2">Tags</p>
-                              <div className="flex flex-wrap gap-1">
-                                {product.tags.map((tag, i) => (
-                                  <Badge key={i} variant="secondary" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
+                          <div className="p-3 bg-muted/30 rounded-xl">
+                            <p className="text-[10px] text-muted-foreground uppercase mb-2">Tags</p>
+                            <div className="flex flex-wrap gap-1">
+                              {product.tags.map((tag, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
                         )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
 
-                        {/* Last Updated */}
-                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                          <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
-                            <Clock className="w-5 h-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Last Updated</p>
-                            <p className="font-medium text-sm">
-                              {product?.updated_at ? new Date(product.updated_at).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              }) : 'Unknown'}
-                            </p>
-                          </div>
+                {/* Custom Stock Panel */}
+                {activePanel === 'stock' && (
+                  <motion.div
+                    key="stock"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base">Custom Stock Update</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('-5')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingDown className="w-4 h-4 mr-1 text-destructive" />
+                            -5
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('-10')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingDown className="w-4 h-4 mr-1 text-destructive" />
+                            -10
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('+5')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                            +5
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('+10')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                            +10
+                          </Button>
                         </div>
-                      </motion.div>
-                    )}
 
-                    {/* Custom Stock Panel */}
-                    {activePanel === 'stock' && (
-                      <motion.div
-                        key="stock"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="space-y-4"
-                      >
-                        <div>
-                          <Label className="text-sm font-medium">Custom Stock Change</Label>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Enter a positive number to add stock, or negative to reduce
-                          </p>
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Enter change (e.g., -3 or +5)"
+                            value={stockChange}
+                            onChange={(e) => setStockChange(e.target.value)}
+                            className="rounded-xl"
+                          />
+                          <Button
+                            onClick={handleCustomStockUpdate}
+                            disabled={loading || !stockChange}
+                            className="rounded-xl btn-hero"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
                         </div>
-                        
-                        <Input
-                          type="number"
-                          value={stockChange}
-                          onChange={(e) => setStockChange(e.target.value)}
-                          placeholder="e.g., +25 or -10"
-                          className="text-lg h-14 rounded-xl text-center font-semibold"
-                        />
-                        
-                        {stockChange && (
-                          <div className="p-3 bg-muted/50 rounded-xl text-center">
-                            <p className="text-sm text-muted-foreground">
-                              New stock will be: <span className="font-bold text-foreground">
-                                {Math.max(0, (product?.stock_quantity || 0) + parseInt(stockChange || '0'))}
-                              </span>
-                            </p>
-                          </div>
-                        )}
-                        
-                        <Button
-                          onClick={handleCustomStockUpdate}
-                          disabled={loading || !stockChange}
-                          className="w-full btn-hero h-14 rounded-xl text-lg"
-                        >
-                          <Check className="w-5 h-5 mr-2" />
-                          Apply Change
-                        </Button>
-                      </motion.div>
-                    )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
 
-                    {/* Location Panel */}
-                    {activePanel === 'location' && (
-                      <motion.div
-                        key="location"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="space-y-4"
-                      >
-                        <div>
-                          <Label className="text-sm font-medium">Move to Location</Label>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Current: <span className="font-semibold">{product?.location || 'Not assigned'}</span>
-                          </p>
+                {/* Location Panel */}
+                {activePanel === 'location' && (
+                  <motion.div
+                    key="location"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base">Change Location</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="px-3 py-1">
+                            Current: {product?.location || 'None'}
+                          </Badge>
+                          <span className="text-muted-foreground">→</span>
+                          <Badge variant="secondary" className="px-3 py-1">
+                            {newLocation || 'Select'}
+                          </Badge>
                         </div>
-                        
-                        <Select value={newLocation} onValueChange={setNewLocation}>
-                          <SelectTrigger className="h-14 rounded-xl text-lg">
-                            <SelectValue placeholder="Select warehouse" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="RA1">RA1 - Warehouse 1</SelectItem>
-                            <SelectItem value="RA2">RA2 - Warehouse 2</SelectItem>
-                            <SelectItem value="RA3">RA3 - Warehouse 3</SelectItem>
-                            <SelectItem value="RA4">RA4 - Warehouse 4</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        
-                        {product?.location && newLocation && newLocation !== product.location && (
-                          <div className="flex items-center justify-center gap-3 p-4 bg-accent/10 rounded-xl">
-                            <Badge variant="outline" className="text-sm">{product.location}</Badge>
-                            <TrendingUp className="w-4 h-4 text-accent" />
-                            <Badge variant="default" className="text-sm">{newLocation}</Badge>
-                          </div>
-                        )}
-                        
+
+                        <div className="grid grid-cols-4 gap-2">
+                          {['RA1', 'RA2', 'RA3', 'RA4'].map((loc) => (
+                            <Button
+                              key={loc}
+                              variant={newLocation === loc ? 'default' : 'outline'}
+                              onClick={() => setNewLocation(loc)}
+                              disabled={product?.location === loc}
+                              className="rounded-xl"
+                            >
+                              {loc}
+                            </Button>
+                          ))}
+                        </div>
+
                         <Button
                           onClick={handleLocationUpdate}
                           disabled={loading || !newLocation || newLocation === product?.location}
-                          className="w-full btn-hero h-14 rounded-xl text-lg"
+                          className="w-full rounded-xl btn-hero"
                         >
-                          <MapPin className="w-5 h-5 mr-2" />
-                          Move Product
+                          <MapPin className="w-4 h-4 mr-2" />
+                          Confirm Move
                         </Button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Flag Panel */}
+                {activePanel === 'flag' && (
+                  <motion.div
+                    key="flag"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Flag className="w-4 h-4" />
+                          Flag for Review
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                          Flag this product if it's damaged, defective, or needs inspection before sale.
+                        </p>
+                        
+                        {product?.status !== 'under_review' && (
+                          <div className="space-y-2">
+                            <Label className="text-xs">Add a note (optional)</Label>
+                            <Textarea
+                              placeholder="e.g., Packaging damaged, needs inspection..."
+                              value={flagNote}
+                              onChange={(e) => setFlagNote(e.target.value)}
+                              className="rounded-xl resize-none"
+                              rows={3}
+                            />
+                          </div>
+                        )}
+
+                        <Button
+                          onClick={handleFlagProduct}
+                          disabled={loading}
+                          variant={product?.status === 'under_review' ? 'default' : 'destructive'}
+                          className="w-full rounded-xl"
+                        >
+                          {product?.status === 'under_review' ? (
+                            <>
+                              <Check className="w-4 h-4 mr-2" />
+                              Clear from Review
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle className="w-4 h-4 mr-2" />
+                              Flag for Review
+                            </>
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* History Panel */}
+                {activePanel === 'history' && (
+                  <motion.div
+                    key="history"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <History className="w-4 h-4" />
+                          Scan History
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2">
+                        {scanHistory.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No scan history yet
+                          </p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {scanHistory.map((item) => (
+                              <div
+                                key={item.id}
+                                className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                                  {getActionIcon(item.action)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm">{formatActionText(item)}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(item.scanned_at).toLocaleString()}
+                                  </p>
+                                  {item.notes && (
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                      <MessageSquare className="w-3 h-3" />
+                                      {item.notes}
+                                    </p>
+                                  )}
+                                </div>
+                                {(item.old_stock !== null && item.new_stock !== null) && (
+                                  <Badge variant="outline" className="text-xs flex-shrink-0">
+                                    {item.old_stock} → {item.new_stock}
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Scan Another Button */}
               <Button
                 onClick={resetScanner}
                 variant="outline"
-                className="w-full h-14 rounded-2xl border-2"
+                className="w-full py-6 rounded-2xl border-2"
               >
                 <QrCode className="w-5 h-5 mr-2" />
                 Scan Another Product

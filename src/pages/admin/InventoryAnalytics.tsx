@@ -7,7 +7,8 @@ import {
   TrendingUp,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Flag
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +45,8 @@ const InventoryAnalytics = () => {
     totalProducts: 0,
     totalStock: 0,
     lowStockItems: 0,
-    outOfStock: 0
+    outOfStock: 0,
+    underReview: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +59,7 @@ const InventoryAnalytics = () => {
       // Fetch all products
       const { data: products, error } = await supabase
         .from('products')
-        .select('id, name, location, stock_quantity, low_stock_threshold');
+        .select('id, name, location, stock_quantity, low_stock_threshold, status');
 
       if (error) throw error;
 
@@ -66,6 +68,7 @@ const InventoryAnalytics = () => {
       let totalStock = 0;
       let lowStockItems = 0;
       let outOfStock = 0;
+      let underReview = 0;
 
       products?.forEach(product => {
         const loc = product.location || 'Unassigned';
@@ -79,6 +82,9 @@ const InventoryAnalytics = () => {
           outOfStock += 1;
         } else if ((product.stock_quantity || 0) <= (product.low_stock_threshold || 10)) {
           lowStockItems += 1;
+        }
+        if (product.status === 'under_review') {
+          underReview += 1;
         }
       });
 
@@ -102,7 +108,8 @@ const InventoryAnalytics = () => {
         totalProducts: products?.length || 0,
         totalStock,
         lowStockItems,
-        outOfStock
+        outOfStock,
+        underReview
       });
 
       // Fetch recent location movements
@@ -167,7 +174,7 @@ const InventoryAnalytics = () => {
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card>
               <CardContent className="pt-6">
@@ -219,6 +226,20 @@ const InventoryAnalytics = () => {
                     <p className="text-3xl font-bold text-destructive">{totals.outOfStock}</p>
                   </div>
                   <AlertTriangle className="w-10 h-10 text-destructive/50" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+            <Card className="border-orange-500/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Under Review</p>
+                    <p className="text-3xl font-bold text-orange-500">{totals.underReview}</p>
+                  </div>
+                  <Flag className="w-10 h-10 text-orange-500/50" />
                 </div>
               </CardContent>
             </Card>
