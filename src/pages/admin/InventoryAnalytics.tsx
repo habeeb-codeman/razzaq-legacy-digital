@@ -7,14 +7,16 @@ import {
   TrendingUp,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight,
-  Flag
+  ArrowLeft,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import SEO from '@/components/SEO';
+import { Link } from 'react-router-dom';
 
 interface LocationStats {
   location: string;
@@ -35,8 +37,6 @@ interface RecentMovement {
   changed_at: string;
 }
 
-const COLORS = ['hsl(var(--accent))', 'hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--muted))'];
-
 const InventoryAnalytics = () => {
   const [locationStats, setLocationStats] = useState<LocationStats[]>([]);
   const [stockStatus, setStockStatus] = useState<StockStatus[]>([]);
@@ -46,7 +46,6 @@ const InventoryAnalytics = () => {
     totalStock: 0,
     lowStockItems: 0,
     outOfStock: 0,
-    underReview: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -55,20 +54,18 @@ const InventoryAnalytics = () => {
   }, []);
 
   const fetchAnalytics = async () => {
+    setLoading(true);
     try {
-      // Fetch all products
       const { data: products, error } = await supabase
         .from('products')
-        .select('id, name, location, stock_quantity, low_stock_threshold, status');
+        .select('id, name, location, stock_quantity, low_stock_threshold');
 
       if (error) throw error;
 
-      // Calculate location stats
       const locationMap = new Map<string, { count: number; totalStock: number }>();
       let totalStock = 0;
       let lowStockItems = 0;
       let outOfStock = 0;
-      let underReview = 0;
 
       products?.forEach(product => {
         const loc = product.location || 'Unassigned';
@@ -83,9 +80,6 @@ const InventoryAnalytics = () => {
         } else if ((product.stock_quantity || 0) <= (product.low_stock_threshold || 10)) {
           lowStockItems += 1;
         }
-        if (product.status === 'under_review') {
-          underReview += 1;
-        }
       });
 
       const locationStatsData: LocationStats[] = Array.from(locationMap.entries()).map(([location, stats]) => ({
@@ -96,7 +90,6 @@ const InventoryAnalytics = () => {
 
       setLocationStats(locationStatsData);
 
-      // Calculate stock status
       const inStock = (products?.length || 0) - lowStockItems - outOfStock;
       setStockStatus([
         { status: 'In Stock', count: inStock },
@@ -109,24 +102,15 @@ const InventoryAnalytics = () => {
         totalStock,
         lowStockItems,
         outOfStock,
-        underReview
       });
 
-      // Fetch recent location movements
       const { data: movements, error: movementsError } = await supabase
         .from('product_location_history')
-        .select(`
-          id,
-          old_location,
-          new_location,
-          changed_at,
-          product_id
-        `)
+        .select(`id, old_location, new_location, changed_at, product_id`)
         .order('changed_at', { ascending: false })
         .limit(10);
 
       if (!movementsError && movements) {
-        // Fetch product names for movements
         const productIds = movements.map(m => m.product_id);
         const { data: productNames } = await supabase
           .from('products')
@@ -165,18 +149,29 @@ const InventoryAnalytics = () => {
 
       <header className="bg-card/50 backdrop-blur-sm border-b border-border/20 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <BarChart3 className="w-6 h-6 text-accent" />
-            <h1 className="text-2xl font-heading font-bold">Inventory Analytics</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link to="/admin">
+                <Button variant="ghost" size="icon" className="rounded-xl">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
+              <BarChart3 className="w-6 h-6 text-accent" />
+              <h1 className="text-2xl font-heading font-bold">Inventory Analytics</h1>
+            </div>
+            <Button onClick={fetchAnalytics} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -190,7 +185,7 @@ const InventoryAnalytics = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -204,7 +199,7 @@ const InventoryAnalytics = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -218,7 +213,7 @@ const InventoryAnalytics = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -230,27 +225,13 @@ const InventoryAnalytics = () => {
               </CardContent>
             </Card>
           </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-            <Card className="border-orange-500/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Under Review</p>
-                    <p className="text-3xl font-bold text-orange-500">{totals.underReview}</p>
-                  </div>
-                  <Flag className="w-10 h-10 text-orange-500/50" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
 
         {/* Charts Row */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Location Distribution */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-accent" />
@@ -280,7 +261,7 @@ const InventoryAnalytics = () => {
 
           {/* Stock Status Pie Chart */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5 text-accent" />
@@ -322,7 +303,7 @@ const InventoryAnalytics = () => {
 
         {/* Stock by Location */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
@@ -352,7 +333,7 @@ const InventoryAnalytics = () => {
 
         {/* Recent Location Movements */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-accent" />
