@@ -112,34 +112,30 @@ const LegacySection = () => {
           ))}
         </div>
 
-        {/* Legacy Stats - Enhanced */}
+        {/* Legacy Stats */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 1 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-16"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16"
         >
           {[
-            { number: '50+', label: 'Years of Excellence', icon: '🏆' },
-            { number: '500+', label: 'Fleet Partners', icon: '🚛' },
-            { number: '10K+', label: 'Parts Delivered', icon: '📦' },
-            { number: '4', label: 'Warehouse Locations', icon: '🏭' }
+            { number: '50+', label: 'Years of Excellence' },
+            { number: '500+', label: 'Fleet Partners' },
+            { number: '10K+', label: 'Parts Delivered' },
+            { number: '4', label: 'Warehouse Locations' }
           ].map((stat, index) => (
             <motion.div 
               key={index} 
-              className="text-center frosted-glass p-6 rounded-xl group hover:scale-105 transition-all duration-300"
-              whileHover={{ y: -5 }}
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 1.2 + index * 0.1 }}
             >
-              <div className="text-3xl mb-2">{stat.icon}</div>
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={inView ? { scale: 1 } : {}}
-                transition={{ duration: 0.6, delay: 1.2 + index * 0.15, type: "spring", bounce: 0.4 }}
-                className="text-4xl lg:text-5xl font-heading font-bold text-accent mb-2 group-hover:text-primary transition-colors"
-              >
+              <div className="text-4xl lg:text-5xl font-heading font-bold text-accent mb-2">
                 {stat.number}
-              </motion.div>
-              <p className="text-muted-foreground text-sm lg:text-base">{stat.label}</p>
+              </div>
+              <p className="text-muted-foreground">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
