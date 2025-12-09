@@ -61,6 +61,51 @@
     --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
+  /* Light Theme */
+  .light {
+    --background: 210 15% 97%; /* Clean light gray */
+    --foreground: 210 40% 15%; /* Dark charcoal */
+
+    --card: 210 20% 99%;
+    --card-foreground: 210 40% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 15%;
+
+    /* Primary - Energetic Teal */
+    --primary: 177 85% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 210 25% 92%;
+    --secondary-foreground: 210 40% 15%;
+
+    --muted: 210 20% 88%;
+    --muted-foreground: 210 15% 45%;
+
+    /* Accent - Rich Gold */
+    --accent: 43 95% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 82%;
+    --input: 210 20% 90%;
+    --ring: 177 85% 35%;
+
+    /* Light Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(177 85% 30%), hsl(177 85% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 15% 97%) 0%, hsl(210 25% 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 20% 99%), hsl(210 20% 96%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 95% 45%), hsl(43 95% 55%));
+
+    /* Light Mode Shadows */
+    --shadow-premium: 0 20px 50px -10px hsl(210 30% 50% / 0.15);
+    --shadow-card: 0 4px 24px hsl(210 30% 50% / 0.08);
+    --shadow-glow: 0 0 30px hsl(177 85% 35% / 0.15);
+    --shadow-accent: 0 4px 20px hsl(43 95% 45% / 0.25);
+  }
 }
 
 @layer base {
