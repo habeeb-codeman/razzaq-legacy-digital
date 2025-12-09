@@ -5,9 +5,12 @@ import {
   Truck, Settings, Zap, Wind, Car, Wrench,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import warehouseInterior from '@/assets/warehouse-interior.jpg';
-import truckInterior from '@/assets/truck-interior.jpg';
-import electricalSystems from '@/assets/electrical-systems.jpg';
+import capabilityCabin from '@/assets/capability-cabin.jpg';
+import capabilityTransmission from '@/assets/capability-transmission.jpg';
+import capabilityCooling from '@/assets/capability-cooling.jpg';
+import capabilityAirfilter from '@/assets/capability-airfilter.jpg';
+import capabilityBodyparts from '@/assets/capability-bodyparts.jpg';
+import capabilityAccessories from '@/assets/capability-accessories.jpg';
 import { Button } from '@/components/ui/button';
 
 const CapabilitiesCarousel = () => {
@@ -20,42 +23,42 @@ const CapabilitiesCarousel = () => {
       title: 'Cabin & Structural Systems',
       description: 'Supplying complete cabin frames, interiors, and structural components for body building and restoration projects.',
       features: ['Complete Cabin Frames', 'Interior Systems', 'Structural Components', 'Restoration Parts'],
-      image: truckInterior
+      image: capabilityCabin
     },
     {
       icon: <Settings className="w-8 h-8" />,
       title: 'Transmission & Drivetrain',
       description: 'A curated selection of genuine and bespoke outer body parts to enhance vehicle functionality and appearance.',
       features: ['Body Panels', 'Aerodynamic Components', 'Custom Fabrication', 'Aesthetic Enhancements'],
-      image: warehouseInterior
+      image: capabilityTransmission
     },
     {
       icon: <Zap className="w-8 h-8" />,
       title: 'Cooling & Fuel Systems',
       description: 'Providing robust fuel tanks, dashboards, and related systems for leading heavy vehicle brands.',
       features: ['Fuel Tank Systems', 'Dashboard Components', 'Electrical Harnesses', 'Control Systems'],
-      image: electricalSystems
+      image: capabilityCooling
     },
     {
       icon: <Wind className="w-8 h-8" />,
       title: 'Engine Air Filtration System',
       description: 'High-performance air filtration systems ensuring optimal engine performance and longevity.',
       features: ['Air Filter Assemblies', 'Intake Systems', 'Dust Separators', 'Filter Elements'],
-      image: warehouseInterior
+      image: capabilityAirfilter
     },
     {
       icon: <Car className="w-8 h-8" />,
       title: 'Body Parts',
       description: 'Ashok Leyland and TATA original dashboards, outer body panels, bumpers, and structural components.',
       features: ['Original Dashboards', 'Outer Body Panels', 'Bumpers & Grilles', 'Structural Parts'],
-      image: truckInterior
+      image: capabilityBodyparts
     },
     {
       icon: <Wrench className="w-8 h-8" />,
       title: 'Other Parts',
       description: 'Complete range of seats, rear view mirrors, doors, sensors, and suspension components.',
       features: ['Seats & Covers', 'Rear View Mirrors', 'Doors & Panels', 'Sensors & Suspensions'],
-      image: electricalSystems
+      image: capabilityAccessories
     }
   ];
 
