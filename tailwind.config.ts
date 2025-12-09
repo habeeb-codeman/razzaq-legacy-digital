@@ -18,10 +18,10 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				heading: ['Space Grotesk', 'sans-serif'],
-				body: ['Inter', 'sans-serif'],
-			},
+		fontFamily: {
+			heading: ['Orbitron', 'sans-serif'],
+			body: ['Inter', 'sans-serif'],
+		},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
