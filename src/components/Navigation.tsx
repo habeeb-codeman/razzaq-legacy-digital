@@ -163,7 +163,6 @@ import razzaqLogo from "@/assets/razzaq-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTreasureHunt } from "@/hooks/useTreasureHunt";
 import TreasureHunt from "./TreasureHunt";
-import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
   { label: "Home", id: "/", isRoute: true },
@@ -320,7 +319,6 @@ const Navigation = () => {
               <Map className="w-4 h-4" />
               <span className="hidden xl:inline">Map</span>
             </Button>
-            <ThemeToggle />
             {isAdmin && (
               <Link to="/admin" className="nav-link font-medium text-accent">
                 Admin
