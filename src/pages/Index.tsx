@@ -1,7 +1,7 @@
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import LegacySection from '@/components/LegacySection';
-import CapabilitiesCarousel from '@/components/CapabilitiesCarousel';
+import CapabilitiesSection from '@/components/CapabilitiesSection';
 import PartnershipsSection from '@/components/PartnershipsSection';
 import AdvantageSection from '@/components/AdvantageSection';
 import ClientTrustSection from '@/components/ClientTrustSection';
@@ -25,7 +25,7 @@ const Index = () => {
       <Navigation />
       <HeroSection />
       <LegacySection />
-      <CapabilitiesCarousel />
+      <CapabilitiesSection />
       <PartnershipsSection />
       <AdvantageSection />
       <ClientTrustSection />

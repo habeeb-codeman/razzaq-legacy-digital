@@ -63,48 +63,48 @@
 
   /* Light Theme */
   .light {
-    --background: 210 15% 97%; /* Clean light gray */
-    --foreground: 210 40% 15%; /* Dark charcoal */
+    --background: 40 20% 98%; /* Off-white */
+    --foreground: 210 45% 12%; /* Dark charcoal */
 
-    --card: 210 20% 99%;
-    --card-foreground: 210 40% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 45% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 15%;
+    --popover-foreground: 210 45% 12%;
 
     /* Primary - Energetic Teal */
-    --primary: 177 85% 30%;
+    --primary: 177 100% 28%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary */
-    --secondary: 210 25% 92%;
-    --secondary-foreground: 210 40% 15%;
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 210 45% 12%;
 
-    --muted: 210 20% 88%;
-    --muted-foreground: 210 15% 45%;
+    --muted: 210 15% 92%;
+    --muted-foreground: 210 20% 40%;
 
-    /* Accent - Rich Gold */
-    --accent: 43 95% 45%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Industrial Gold */
+    --accent: 43 100% 50%;
+    --accent-foreground: 210 45% 8%;
 
-    --destructive: 0 84% 55%;
+    --destructive: 0 84.2% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 82%;
-    --input: 210 20% 90%;
-    --ring: 177 85% 35%;
+    --border: 210 15% 85%;
+    --input: 210 15% 90%;
+    --ring: 177 100% 33%;
 
     /* Light Mode Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(177 85% 30%), hsl(177 85% 40%));
-    --gradient-hero: linear-gradient(135deg, hsl(210 15% 97%) 0%, hsl(210 25% 94%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(210 20% 99%), hsl(210 20% 96%));
-    --gradient-accent: linear-gradient(135deg, hsl(43 95% 45%), hsl(43 95% 55%));
+    --gradient-primary: linear-gradient(135deg, hsl(177 100% 28%), hsl(177 100% 35%));
+    --gradient-hero: linear-gradient(135deg, hsl(40 20% 98%) 0%, hsl(210 20% 96%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 100% 50%), hsl(43 100% 58%));
 
     /* Light Mode Shadows */
-    --shadow-premium: 0 20px 50px -10px hsl(210 30% 50% / 0.15);
-    --shadow-card: 0 4px 24px hsl(210 30% 50% / 0.08);
-    --shadow-glow: 0 0 30px hsl(177 85% 35% / 0.15);
-    --shadow-accent: 0 4px 20px hsl(43 95% 45% / 0.25);
+    --shadow-premium: 0 20px 50px -10px hsl(210 25% 70% / 0.3);
+    --shadow-card: 0 8px 32px hsl(210 25% 70% / 0.15);
+    --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.1);
+    --shadow-accent: 0 4px 20px hsl(43 100% 50% / 0.2);
   }
 }
 
@@ -202,46 +202,32 @@
 
 
   .glass-card {
-    @apply backdrop-blur-xl rounded-xl p-6;
-    background: linear-gradient(135deg, 
-      hsl(var(--card)) 0%, 
-      hsl(var(--card) / 0.8) 100%
-    );
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: var(--shadow-card);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .dark .glass-card {
+    @apply bg-white/[0.08] backdrop-blur-xl border border-white/10 rounded-xl p-6;
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.8) 0%, 
       hsl(var(--card) / 0.4) 100%
     );
-    border-color: hsl(var(--border) / 0.3);
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card:hover {
     border-color: hsl(var(--accent) / 0.4);
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.9) 0%, 
+      hsl(var(--card) / 0.5) 100%
+    );
     box-shadow: var(--shadow-glow);
     transform: translateY(-2px);
   }
 
   .frosted-glass {
-    @apply backdrop-blur-2xl rounded-xl p-6;
-    background: linear-gradient(135deg, 
-      hsl(var(--card)) 0%, 
-      hsl(var(--card) / 0.7) 100%
-    );
-    border: 1px solid hsl(var(--border) / 0.4);
-    box-shadow: var(--shadow-card);
-  }
-
-  .dark .frosted-glass {
+    @apply bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-xl p-6;
     background: linear-gradient(135deg, 
       hsl(var(--background) / 0.6) 0%, 
       hsl(var(--background) / 0.3) 100%
     );
-    border-color: hsl(var(--border) / 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
   /* Text Styles */

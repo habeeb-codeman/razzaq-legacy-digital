@@ -164,19 +164,17 @@ const HeroSection = () => {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay - Optimized for both themes */}
+      {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img
           src={heroTruck}
           alt="Modern truck on highway at dusk - Razzaq Automotives"
           className="w-full h-full object-cover"
         />
-        {/* Dark mode overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,45%,8%)]/95 via-[hsl(210,45%,8%)]/70 to-[hsl(210,45%,8%)]/30 dark:block hidden" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(210,45%,8%)]/80 via-transparent to-transparent dark:block hidden" />
-        {/* Light mode overlay - cleaner, less tint */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,15%,97%)]/90 via-[hsl(210,15%,97%)]/50 to-transparent dark:hidden" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(210,15%,97%)]/70 via-transparent to-transparent dark:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+        {/* Glass overlay effect */}
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-[1px]" />
       </div>
 
       {/* Content */}

@@ -57,54 +57,42 @@ const LegacySection = () => {
           {timelineEvents.map((event, index) => (
             <motion.div
               key={event.year}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50, scale: 0.95 }}
-              animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
-              transition={{ duration: 0.8, delay: index * 0.3, type: "spring", bounce: 0.3 }}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+              animate={inView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
               className={`relative flex items-center mb-16 ${
                 index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
               }`}
             >
-              {/* Content Card - Enhanced */}
+              {/* Content Card */}
               <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'}`}>
-                <motion.div 
-                  className="glass-card group hover:border-accent/50 transition-all duration-500"
-                  whileHover={{ scale: 1.02, y: -5 }}
-                >
+                <div className="glass-card">
                   <div className="flex items-center mb-4">
-                    <motion.div 
-                      className="flex items-center justify-center w-14 h-14 bg-gradient-primary rounded-xl mr-4 shadow-lg group-hover:shadow-glow transition-all duration-300"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg mr-4">
                       <span className="text-primary-foreground">
                         {event.icon}
                       </span>
-                    </motion.div>
+                    </div>
                     <div>
-                      <h3 className="text-3xl font-heading font-bold text-accent group-hover:text-primary transition-colors">
+                      <h3 className="text-2xl font-heading font-semibold text-accent">
                         {event.year}
                       </h3>
-                      <p className="text-sm text-muted-foreground font-medium">
+                      <p className="text-sm text-muted-foreground">
                         {event.stats}
                       </p>
                     </div>
                   </div>
-                  <h4 className="text-xl font-heading font-semibold mb-3 group-hover:text-accent transition-colors">
+                  <h4 className="text-xl font-heading font-semibold mb-3">
                     {event.title}
                   </h4>
                   <p className="text-muted-foreground leading-relaxed">
                     {event.description}
                   </p>
-                </motion.div>
+                </div>
               </div>
 
-              {/* Timeline Node - Enhanced */}
-              <motion.div 
-                className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 bg-accent rounded-full border-4 border-background shadow-glow z-10"
-                initial={{ scale: 0 }}
-                animate={inView ? { scale: 1 } : {}}
-                transition={{ delay: index * 0.3 + 0.2, type: "spring", bounce: 0.5 }}
-              />
+              {/* Timeline Node */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-accent rounded-full border-4 border-background shadow-glow" />
 
               {/* Spacer for opposite side */}
               <div className="hidden lg:block w-5/12" />
@@ -120,23 +108,22 @@ const LegacySection = () => {
           className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16"
         >
           {[
-            { number: '50+', label: 'Years of Excellence' },
-            { number: '500+', label: 'Fleet Partners' },
-            { number: '10K+', label: 'Parts Delivered' },
-            { number: '4', label: 'Warehouse Locations' }
+            { number: '50+', label: 'Years of Experience' },
+            { number: '100+', label: 'Businesses & Fleets Served' },
+            { number: '1000s', label: 'Customers' },
+            { number: '3', label: 'Locations' }
           ].map((stat, index) => (
-            <motion.div 
-              key={index} 
-              className="text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 1.2 + index * 0.1 }}
-            >
-              <div className="text-4xl lg:text-5xl font-heading font-bold text-accent mb-2">
+            <div key={index} className="text-center frosted-glass p-6 rounded-xl">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={inView ? { scale: 1 } : {}}
+                transition={{ duration: 0.6, delay: 1.2 + index * 0.15, type: "spring", bounce: 0.4 }}
+                className="text-4xl lg:text-5xl font-heading font-bold text-accent mb-2"
+              >
                 {stat.number}
-              </div>
+              </motion.div>
               <p className="text-muted-foreground">{stat.label}</p>
-            </motion.div>
+            </div>
           ))}
         </motion.div>
       </div>

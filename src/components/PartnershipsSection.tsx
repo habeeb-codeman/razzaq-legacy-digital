@@ -79,44 +79,33 @@ const PartnershipsSection = () => {
             {
               title: 'Genuine Parts',
               description: 'Direct access to OEM-quality components from authorized suppliers',
-              stat: '100%',
-              icon: '✓'
+              stat: '100%'
             },
             {
               title: 'Quality Assurance',
               description: 'All parts backed by manufacturer warranties and quality certifications',
-              stat: 'Certified',
-              icon: '★'
+              stat: 'Certified'
             },
             {
               title: 'Technical Support',
               description: 'Expert guidance and technical support from our partner network',
-              stat: '24/7',
-              icon: '⚙'
+              stat: '24/7'
             }
           ].map((benefit, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 40, scale: 0.9 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ duration: 0.6, delay: 1.2 + index * 0.2, type: "spring", bounce: 0.3 }}
-              whileHover={{ y: -8, scale: 1.03 }}
-              className="text-center frosted-glass p-6 rounded-xl cursor-pointer group"
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 1.2 + index * 0.2 }}
+              className="text-center"
             >
-              <motion.div 
-                className="text-4xl mb-3"
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-              >
-                {benefit.icon}
-              </motion.div>
-              <div className="text-3xl font-heading font-bold text-accent mb-2 group-hover:text-primary transition-colors">
+              <div className="text-3xl font-heading font-bold text-accent mb-2">
                 {benefit.stat}
               </div>
               <h4 className="text-xl font-heading font-semibold mb-3">
                 {benefit.title}
               </h4>
-              <p className="text-muted-foreground leading-relaxed text-sm">
+              <p className="text-muted-foreground leading-relaxed">
                 {benefit.description}
               </p>
             </motion.div>

@@ -68,35 +68,23 @@ const AdvantageSection = () => {
           {advantages.map((advantage, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 60, rotateX: -10 }}
-              animate={inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-              transition={{ duration: 0.8, delay: index * 0.2, type: "spring", bounce: 0.3 }}
-              whileHover={{ y: -10, scale: 1.02 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
               className="group"
             >
               <div className="card-premium h-full relative overflow-hidden">
                 {/* Background Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${advantage.gradient} opacity-50 group-hover:opacity-70 transition-opacity duration-500`} />
                 
-                {/* Animated Background Shapes */}
-                <motion.div 
-                  className="absolute -top-10 -right-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                />
-                
                 {/* Content */}
                 <div className="relative z-10">
                   {/* Icon */}
-                  <motion.div 
-                    className="flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-xl mb-6 shadow-lg"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6 }}
-                  >
+                  <div className="flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
                     <span className="text-primary-foreground">
                       {advantage.icon}
                     </span>
-                  </motion.div>
+                  </div>
 
                   {/* Title and Description */}
                   <h3 className="text-2xl font-heading font-semibold mb-4 group-hover:text-primary transition-colors">
@@ -115,13 +103,10 @@ const AdvantageSection = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={inView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.5, delay: 0.8 + index * 0.2 + benefitIndex * 0.1 }}
-                        className="flex items-start group/item"
+                        className="flex items-start"
                       >
-                        <motion.div 
-                          className="w-2 h-2 bg-accent rounded-full mt-2 mr-3 flex-shrink-0"
-                          whileHover={{ scale: 1.5 }}
-                        />
-                        <span className="text-sm text-muted-foreground group-hover/item:text-foreground transition-colors">
+                        <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3 flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">
                           {benefit}
                         </span>
                       </motion.div>
@@ -135,44 +120,31 @@ const AdvantageSection = () => {
 
         {/* Call to Action */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.95 }}
-          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-          transition={{ duration: 0.8, delay: 1, type: "spring" }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 1 }}
           className="text-center mt-16"
         >
-          <motion.div 
-            className="card-hero max-w-2xl mx-auto relative overflow-hidden"
-            whileHover={{ scale: 1.02 }}
-          >
-            {/* Animated gradient background */}
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10"
-              animate={{ x: ['-100%', '100%'] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            />
-            <div className="relative z-10">
-              <h3 className="text-2xl font-heading font-semibold mb-4">
-                Ready to Experience the Razzaq Advantage?
-              </h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Join hundreds of satisfied clients who trust us with their heavy vehicle needs. 
-                Let's discuss how we can support your fleet requirements.
-              </p>
-              <motion.button
-                onClick={() => {
-                  const element = document.getElementById('contact');
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="btn-hero px-8 py-3 rounded-lg font-semibold transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Get Started Today
-              </motion.button>
-            </div>
-          </motion.div>
+          <div className="card-hero max-w-2xl mx-auto">
+            <h3 className="text-2xl font-heading font-semibold mb-4">
+              Ready to Experience the Razzaq Advantage?
+            </h3>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Join hundreds of satisfied clients who trust us with their heavy vehicle needs. 
+              Let's discuss how we can support your fleet requirements.
+            </p>
+            <button
+              onClick={() => {
+                const element = document.getElementById('contact');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="btn-hero px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+            >
+              Get Started Today
+            </button>
+          </div>
         </motion.div>
       </div>
     </section>
