@@ -429,8 +429,8 @@ export type Database = {
     Functions: {
       generate_bill_number: { Args: never; Returns: string }
       generate_product_code:
-        | { Args: { p_location: string }; Returns: string }
         | { Args: never; Returns: string }
+        | { Args: { p_location: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

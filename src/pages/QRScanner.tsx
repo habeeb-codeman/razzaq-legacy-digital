@@ -20,19 +20,15 @@ import {
   DollarSign,
   Clock,
   Hash,
-  Flag,
-  AlertTriangle,
   History,
   MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -59,8 +55,6 @@ interface Product {
   tags: string[] | null;
   created_at: string;
   updated_at: string;
-  status: string;
-  review_notes: string | null;
 }
 
 interface ScanHistoryItem {
@@ -117,8 +111,7 @@ const QRScanner = () => {
   const [stockChange, setStockChange] = useState('');
   const [newLocation, setNewLocation] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location' | 'flag' | 'history'>('info');
-  const [flagNote, setFlagNote] = useState('');
+  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location' | 'history'>('info');
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const scannerInitializedRef = useRef(false);
@@ -148,7 +141,7 @@ const QRScanner = () => {
 
   // Record scan action
   const recordScanAction = async (
-    action: 'view' | 'sold' | 'stock_up' | 'location_change' | 'flag' | 'unflag',
+    action: 'view' | 'sold' | 'stock_up' | 'location_change',
     details?: {
       quantity_change?: number;
       old_stock?: number;
@@ -469,54 +462,12 @@ const QRScanner = () => {
     }
   };
 
-  const handleFlagProduct = async () => {
-    if (!product) return;
-
-    setLoading(true);
-    try {
-      const newStatus = product.status === 'under_review' ? 'available' : 'under_review';
-      
-      const { error } = await supabase
-        .from('products')
-        .update({ 
-          status: newStatus,
-          review_notes: newStatus === 'under_review' ? flagNote : null,
-          flagged_at: newStatus === 'under_review' ? new Date().toISOString() : null,
-          flagged_by: newStatus === 'under_review' ? user?.id : null,
-        })
-        .eq('id', product.id);
-
-      if (error) throw error;
-
-      await recordScanAction(newStatus === 'under_review' ? 'flag' : 'unflag', {
-        notes: flagNote || undefined,
-      });
-
-      setProduct({ 
-        ...product, 
-        status: newStatus,
-        review_notes: newStatus === 'under_review' ? flagNote : null,
-      });
-      setFlagNote('');
-      playSound('action');
-      toast.success(newStatus === 'under_review' ? 'Product flagged for review' : 'Product cleared from review');
-      fetchScanHistory(product.id);
-    } catch (error: any) {
-      console.error('Error flagging product:', error);
-      playSound('error');
-      toast.error('Failed to update product status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const resetScanner = () => {
     setScannedData(null);
     setProduct(null);
     setActivePanel('info');
     setStockChange('');
     setNewLocation('');
-    setFlagNote('');
     setScanHistory([]);
   };
 
@@ -535,8 +486,6 @@ const QRScanner = () => {
       case 'sold': return <ShoppingCart className="w-4 h-4 text-destructive" />;
       case 'stock_up': return <PackagePlus className="w-4 h-4 text-green-500" />;
       case 'location_change': return <MapPin className="w-4 h-4 text-blue-500" />;
-      case 'flag': return <Flag className="w-4 h-4 text-orange-500" />;
-      case 'unflag': return <Check className="w-4 h-4 text-green-500" />;
       case 'view': return <QrCode className="w-4 h-4 text-muted-foreground" />;
       default: return <Clock className="w-4 h-4" />;
     }
@@ -547,8 +496,6 @@ const QRScanner = () => {
       case 'sold': return `Sold ${Math.abs(item.quantity_change || 0)} units`;
       case 'stock_up': return `Stocked up ${item.quantity_change || 0} units`;
       case 'location_change': return `Moved to ${item.new_stock}`;
-      case 'flag': return 'Flagged for review';
-      case 'unflag': return 'Cleared from review';
       case 'view': return 'Scanned';
       default: return item.action;
     }
@@ -654,24 +601,9 @@ const QRScanner = () => {
                       <Badge variant={getStockStatus().color}>
                         {getStockStatus().text}
                       </Badge>
-                      {product?.status === 'under_review' && (
-                        <Badge variant="outline" className="border-orange-500 text-orange-500">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          Under Review
-                        </Badge>
-                      )}
                     </div>
                   </div>
                 </div>
-                
-                {/* Review Notes if flagged */}
-                {product?.status === 'under_review' && product.review_notes && (
-                  <div className="px-4 py-2 bg-orange-500/10 border-t border-orange-500/20">
-                    <p className="text-xs text-orange-600 dark:text-orange-400">
-                      <strong>Review Note:</strong> {product.review_notes}
-                    </p>
-                  </div>
-                )}
                 
                 {/* Stock Display */}
                 <div className="p-4 bg-card">
@@ -717,7 +649,6 @@ const QRScanner = () => {
                   { id: 'info', icon: Package, label: 'Info' },
                   { id: 'stock', icon: Boxes, label: 'Stock' },
                   { id: 'location', icon: MapPin, label: 'Move' },
-                  { id: 'flag', icon: Flag, label: 'Flag' },
                   { id: 'history', icon: History, label: 'History' },
                 ].map(({ id, icon: Icon, label }) => (
                   <Button
@@ -919,62 +850,6 @@ const QRScanner = () => {
                         >
                           <MapPin className="w-4 h-4 mr-2" />
                           Confirm Move
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-
-                {/* Flag Panel */}
-                {activePanel === 'flag' && (
-                  <motion.div
-                    key="flag"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <Card className="border-border/30">
-                      <CardHeader className="pb-2 pt-4 px-4">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <Flag className="w-4 h-4" />
-                          Flag for Review
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-2 space-y-3">
-                        <p className="text-sm text-muted-foreground">
-                          Flag this product if it's damaged, defective, or needs inspection before sale.
-                        </p>
-                        
-                        {product?.status !== 'under_review' && (
-                          <div className="space-y-2">
-                            <Label className="text-xs">Add a note (optional)</Label>
-                            <Textarea
-                              placeholder="e.g., Packaging damaged, needs inspection..."
-                              value={flagNote}
-                              onChange={(e) => setFlagNote(e.target.value)}
-                              className="rounded-xl resize-none"
-                              rows={3}
-                            />
-                          </div>
-                        )}
-
-                        <Button
-                          onClick={handleFlagProduct}
-                          disabled={loading}
-                          variant={product?.status === 'under_review' ? 'default' : 'destructive'}
-                          className="w-full rounded-xl"
-                        >
-                          {product?.status === 'under_review' ? (
-                            <>
-                              <Check className="w-4 h-4 mr-2" />
-                              Clear from Review
-                            </>
-                          ) : (
-                            <>
-                              <AlertTriangle className="w-4 h-4 mr-2" />
-                              Flag for Review
-                            </>
-                          )}
                         </Button>
                       </CardContent>
                     </Card>

@@ -1,61 +1,150 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, LogOut, FileText, Receipt, BookOpen, BarChart3, QrCode } from 'lucide-react';
+import { 
+  Package, 
+  LogOut, 
+  FileText, 
+  Receipt, 
+  BookOpen, 
+  BarChart3, 
+  QrCode, 
+  Plus, 
+  Upload, 
+  Tag, 
+  TrendingUp, 
+  AlertTriangle,
+  MapPin,
+  Printer,
+  Settings,
+  Calendar,
+  DollarSign
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import SEO from '@/components/SEO';
 import razzaqLogo from '@/assets/razzaq-logo.png';
 
+interface DashboardStats {
+  totalProducts: number;
+  publishedProducts: number;
+  draftProducts: number;
+  totalBills: number;
+  totalBlogs: number;
+  publishedBlogs: number;
+  lowStockItems: number;
+  outOfStock: number;
+  recentBillTotal: number;
+  locationCounts: Record<string, number>;
+}
+
 const Dashboard = () => {
   const { signOut, user } = useAuth();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     publishedProducts: 0,
     draftProducts: 0,
     totalBills: 0,
     totalBlogs: 0,
-    publishedBlogs: 0
+    publishedBlogs: 0,
+    lowStockItems: 0,
+    outOfStock: 0,
+    recentBillTotal: 0,
+    locationCounts: {}
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
-    const { count: total } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true });
+    try {
+      // Fetch products with stock info
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, published, stock_quantity, low_stock_threshold, location');
 
-    const { count: published } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .eq('published', true);
+      const total = products?.length || 0;
+      const published = products?.filter(p => p.published).length || 0;
+      let lowStock = 0;
+      let outOfStock = 0;
+      const locationCounts: Record<string, number> = {};
 
-    const { count: billsCount } = await supabase
-      .from('bills')
-      .select('*', { count: 'exact', head: true });
+      products?.forEach(product => {
+        const stock = product.stock_quantity || 0;
+        const threshold = product.low_stock_threshold || 10;
+        
+        if (stock === 0) outOfStock++;
+        else if (stock <= threshold) lowStock++;
 
-    const { count: totalBlogs } = await supabase
-      .from('blog_posts')
-      .select('*', { count: 'exact', head: true });
+        const loc = product.location || 'Unassigned';
+        locationCounts[loc] = (locationCounts[loc] || 0) + 1;
+      });
 
-    const { count: publishedBlogs } = await supabase
-      .from('blog_posts')
-      .select('*', { count: 'exact', head: true })
-      .eq('published', true);
+      // Fetch bills
+      const { count: billsCount } = await supabase
+        .from('bills')
+        .select('*', { count: 'exact', head: true });
 
-    setStats({
-      totalProducts: total || 0,
-      publishedProducts: published || 0,
-      draftProducts: (total || 0) - (published || 0),
-      totalBills: billsCount || 0,
-      totalBlogs: totalBlogs || 0,
-      publishedBlogs: publishedBlogs || 0
-    });
+      // Get recent bills total
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { data: recentBills } = await supabase
+        .from('bills')
+        .select('total_amount')
+        .gte('created_at', thirtyDaysAgo.toISOString());
+
+      const recentBillTotal = recentBills?.reduce((sum, bill) => sum + (bill.total_amount || 0), 0) || 0;
+
+      // Fetch blogs
+      const { count: totalBlogs } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: publishedBlogs } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('published', true);
+
+      setStats({
+        totalProducts: total,
+        publishedProducts: published,
+        draftProducts: total - published,
+        totalBills: billsCount || 0,
+        totalBlogs: totalBlogs || 0,
+        publishedBlogs: publishedBlogs || 0,
+        lowStockItems: lowStock,
+        outOfStock: outOfStock,
+        recentBillTotal,
+        locationCounts
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const quickActions = [
+    { to: '/admin/products', icon: Package, label: 'Products', color: 'text-accent', description: 'Manage inventory' },
+    { to: '/admin/inventory-analytics', icon: BarChart3, label: 'Analytics', color: 'text-blue-500', description: 'View insights' },
+    { to: '/qr-scanner', icon: QrCode, label: 'QR Scanner', color: 'text-purple-500', description: 'Scan products' },
+    { to: '/admin/blog', icon: BookOpen, label: 'Blog', color: 'text-pink-500', description: 'Manage posts' },
+    { to: '/admin/bills', icon: Receipt, label: 'Billing', color: 'text-green-500', description: 'Create invoices' },
+    { to: '/admin/qr-labels', icon: Printer, label: 'QR Labels', color: 'text-orange-500', description: 'Print labels' },
+  ];
+
+  const secondaryActions = [
+    { to: '/admin/products/new', icon: Plus, label: 'Add Product' },
+    { to: '/admin/bulk-import', icon: Upload, label: 'Bulk Import' },
+    { to: '/admin/bulk-location-update', icon: MapPin, label: 'Update Locations' },
+    { to: '/admin/bills/new', icon: FileText, label: 'Create Bill' },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,91 +187,172 @@ const Dashboard = () => {
         >
           <div>
             <h2 className="text-3xl font-heading font-bold mb-2">Welcome Back!</h2>
-            <p className="text-muted-foreground">Manage your products and inventory</p>
+            <p className="text-muted-foreground">Here's an overview of your business</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-                <Package className="h-4 w-4 text-accent" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalProducts}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.publishedProducts} published, {stats.draftProducts} drafts
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
+              <Card className="border-accent/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <Package className="w-5 h-5 text-accent" />
+                    <Badge variant="secondary" className="text-xs">{stats.publishedProducts} live</Badge>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.totalProducts}</p>
+                  <p className="text-xs text-muted-foreground">Total Products</p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Blog Posts</CardTitle>
-                <BookOpen className="h-4 w-4 text-purple-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalBlogs}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.publishedBlogs} published
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+              <Card className="border-yellow-500/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                    {stats.lowStockItems > 0 && <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">Alert</Badge>}
+                  </div>
+                  <p className="text-2xl font-bold text-yellow-500">{stats.lowStockItems}</p>
+                  <p className="text-xs text-muted-foreground">Low Stock Items</p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bills</CardTitle>
-                <Receipt className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalBills}</div>
-              </CardContent>
-            </Card>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <Card className="border-destructive/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <Package className="w-5 h-5 text-destructive" />
+                    {stats.outOfStock > 0 && <Badge variant="destructive" className="text-xs">Critical</Badge>}
+                  </div>
+                  <p className="text-2xl font-bold text-destructive">{stats.outOfStock}</p>
+                  <p className="text-xs text-muted-foreground">Out of Stock</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+              <Card className="border-green-500/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <Receipt className="w-5 h-5 text-green-500" />
+                    <Badge variant="secondary" className="text-xs">{stats.totalBills} total</Badge>
+                  </div>
+                  <p className="text-2xl font-bold">₹{(stats.recentBillTotal / 1000).toFixed(0)}K</p>
+                  <p className="text-xs text-muted-foreground">Last 30 Days</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <Card className="border-pink-500/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <BookOpen className="w-5 h-5 text-pink-500" />
+                    <Badge variant="secondary" className="text-xs">{stats.publishedBlogs} live</Badge>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.totalBlogs}</p>
+                  <p className="text-xs text-muted-foreground">Blog Posts</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+              <Card className="border-blue-500/20">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <MapPin className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <p className="text-2xl font-bold">{Object.keys(stats.locationCounts).length}</p>
+                  <p className="text-xs text-muted-foreground">Active Locations</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Link to="/admin/products">
-                <Button className="w-full btn-hero" size="lg">
-                  <Package className="w-5 h-5 mr-2" />
-                  Manage Products
-                </Button>
-              </Link>
-              <Link to="/admin/inventory-analytics">
-                <Button className="w-full" variant="outline" size="lg">
-                  <BarChart3 className="w-5 h-5 mr-2" />
-                  Inventory Analytics
-                </Button>
-              </Link>
-              <Link to="/qr-scanner">
-                <Button className="w-full" variant="outline" size="lg">
-                  <QrCode className="w-5 h-5 mr-2" />
-                  QR Scanner
-                </Button>
-              </Link>
-              <Link to="/admin/blog">
-                <Button className="w-full" variant="outline" size="lg">
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Manage Blog
-                </Button>
-              </Link>
-              <Link to="/admin/bills">
-                <Button className="w-full" variant="outline" size="lg">
-                  <FileText className="w-5 h-5 mr-2" />
-                  Billing System
-                </Button>
-              </Link>
-              <Link to="/admin/products/new">
-                <Button className="w-full" variant="outline" size="lg">
-                  Add New Product
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          {/* Main Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Access frequently used features</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {quickActions.map(({ to, icon: Icon, label, color, description }) => (
+                    <Link key={to} to={to}>
+                      <div className="group p-4 rounded-xl border border-border/50 hover:border-accent/50 hover:bg-accent/5 transition-all duration-300 h-full">
+                        <div className={`w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                          <Icon className={`w-5 h-5 ${color}`} />
+                        </div>
+                        <p className="font-medium text-sm">{label}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Secondary Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>More Actions</CardTitle>
+                <CardDescription>Additional management options</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {secondaryActions.map(({ to, icon: Icon, label }) => (
+                    <Link key={to} to={to}>
+                      <Button variant="outline" className="gap-2">
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Location Distribution */}
+          {Object.keys(stats.locationCounts).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-accent" />
+                    Inventory Distribution
+                  </CardTitle>
+                  <CardDescription>Products across warehouse locations</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {Object.entries(stats.locationCounts).map(([location, count]) => (
+                      <div key={location} className="p-4 rounded-xl bg-muted/30 border border-border/30 text-center">
+                        <p className="text-2xl font-bold text-accent">{count}</p>
+                        <p className="text-sm text-muted-foreground">{location}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </motion.div>
       </main>
     </div>
