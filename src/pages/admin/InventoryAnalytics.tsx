@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Package, 
@@ -7,13 +8,14 @@ import {
   TrendingUp,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight,
-  Flag
+  ArrowLeft,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import SEO from '@/components/SEO';
 
 interface LocationStats {
@@ -35,8 +37,6 @@ interface RecentMovement {
   changed_at: string;
 }
 
-const COLORS = ['hsl(var(--accent))', 'hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--muted))'];
-
 const InventoryAnalytics = () => {
   const [locationStats, setLocationStats] = useState<LocationStats[]>([]);
   const [stockStatus, setStockStatus] = useState<StockStatus[]>([]);
@@ -45,8 +45,7 @@ const InventoryAnalytics = () => {
     totalProducts: 0,
     totalStock: 0,
     lowStockItems: 0,
-    outOfStock: 0,
-    underReview: 0
+    outOfStock: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -55,11 +54,12 @@ const InventoryAnalytics = () => {
   }, []);
 
   const fetchAnalytics = async () => {
+    setLoading(true);
     try {
       // Fetch all products
       const { data: products, error } = await supabase
         .from('products')
-        .select('id, name, location, stock_quantity, low_stock_threshold, status');
+        .select('id, name, location, stock_quantity, low_stock_threshold');
 
       if (error) throw error;
 
@@ -68,7 +68,6 @@ const InventoryAnalytics = () => {
       let totalStock = 0;
       let lowStockItems = 0;
       let outOfStock = 0;
-      let underReview = 0;
 
       products?.forEach(product => {
         const loc = product.location || 'Unassigned';
@@ -82,9 +81,6 @@ const InventoryAnalytics = () => {
           outOfStock += 1;
         } else if ((product.stock_quantity || 0) <= (product.low_stock_threshold || 10)) {
           lowStockItems += 1;
-        }
-        if (product.status === 'under_review') {
-          underReview += 1;
         }
       });
 
@@ -108,8 +104,7 @@ const InventoryAnalytics = () => {
         totalProducts: products?.length || 0,
         totalStock,
         lowStockItems,
-        outOfStock,
-        underReview
+        outOfStock
       });
 
       // Fetch recent location movements
@@ -165,16 +160,27 @@ const InventoryAnalytics = () => {
 
       <header className="bg-card/50 backdrop-blur-sm border-b border-border/20 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <BarChart3 className="w-6 h-6 text-accent" />
-            <h1 className="text-2xl font-heading font-bold">Inventory Analytics</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link to="/admin">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
+              <BarChart3 className="w-6 h-6 text-accent" />
+              <h1 className="text-2xl font-heading font-bold">Inventory Analytics</h1>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchAnalytics}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card>
               <CardContent className="pt-6">
@@ -226,20 +232,6 @@ const InventoryAnalytics = () => {
                     <p className="text-3xl font-bold text-destructive">{totals.outOfStock}</p>
                   </div>
                   <AlertTriangle className="w-10 h-10 text-destructive/50" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-            <Card className="border-orange-500/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Under Review</p>
-                    <p className="text-3xl font-bold text-orange-500">{totals.underReview}</p>
-                  </div>
-                  <Flag className="w-10 h-10 text-orange-500/50" />
                 </div>
               </CardContent>
             </Card>
