@@ -6,25 +6,33 @@ import {
   QrCode, 
   Package, 
   MapPin, 
+  TrendingUp, 
+  TrendingDown, 
   X,
+  Check,
   AlertCircle,
   ShoppingCart,
   PackagePlus,
   Camera,
   RotateCcw,
   Boxes,
+  Tag,
   DollarSign,
   Clock,
   Hash,
-  History
+  Flag,
+  AlertTriangle,
+  History,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -51,6 +59,8 @@ interface Product {
   tags: string[] | null;
   created_at: string;
   updated_at: string;
+  status: string;
+  review_notes: string | null;
 }
 
 interface ScanHistoryItem {
@@ -107,11 +117,13 @@ const QRScanner = () => {
   const [stockChange, setStockChange] = useState('');
   const [newLocation, setNewLocation] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location' | 'history'>('info');
+  const [activePanel, setActivePanel] = useState<'info' | 'stock' | 'location' | 'flag' | 'history'>('info');
+  const [flagNote, setFlagNote] = useState('');
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const scannerInitializedRef = useRef(false);
 
+  // Cleanup scanner on unmount
   useEffect(() => {
     return () => {
       if (html5QrCodeRef.current && scannerInitializedRef.current) {
@@ -120,6 +132,7 @@ const QRScanner = () => {
     };
   }, []);
 
+  // Fetch scan history when product changes
   const fetchScanHistory = useCallback(async (productId: string) => {
     const { data, error } = await supabase
       .from('scan_history')
@@ -133,8 +146,9 @@ const QRScanner = () => {
     }
   }, []);
 
+  // Record scan action
   const recordScanAction = async (
-    action: 'view' | 'sold' | 'stock_up' | 'location_change',
+    action: 'view' | 'sold' | 'stock_up' | 'location_change' | 'flag' | 'unflag',
     details?: {
       quantity_change?: number;
       old_stock?: number;
@@ -158,6 +172,7 @@ const QRScanner = () => {
     }
   };
 
+  // Show login prompt if not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -167,11 +182,13 @@ const QRScanner = () => {
           animate={{ opacity: 1, scale: 1 }}
         >
           <Card className="max-w-md w-full border-accent/20">
-            <CardContent className="pt-6 space-y-4 text-center">
+            <CardHeader className="text-center pb-2">
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <QrCode className="w-8 h-8 text-accent" />
               </div>
-              <h2 className="text-xl font-bold">Login Required</h2>
+              <CardTitle>Login Required</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-center">
               <p className="text-muted-foreground">
                 Please log in with an admin account to access the inventory scanner.
               </p>
@@ -185,6 +202,7 @@ const QRScanner = () => {
     );
   }
 
+  // Show access denied if logged in but not admin
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -194,11 +212,13 @@ const QRScanner = () => {
           animate={{ opacity: 1, scale: 1 }}
         >
           <Card className="max-w-md w-full border-destructive/20">
-            <CardContent className="pt-6 space-y-4 text-center">
+            <CardHeader className="text-center pb-2">
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-bold text-destructive">Access Denied</h2>
+              <CardTitle className="text-destructive">Access Denied</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-center">
               <p className="text-muted-foreground">
                 Admin privileges are required to access the QR scanner.
               </p>
@@ -248,6 +268,7 @@ const QRScanner = () => {
             setProduct(data);
             fetchScanHistory(data.id);
             
+            // Record view action
             await supabase.from('scan_history').insert({
               product_id: data.id,
               scanned_by: user?.id,
@@ -415,7 +436,7 @@ const QRScanner = () => {
 
       if (updateError) throw updateError;
 
-      await supabase
+      const { error: historyError } = await supabase
         .from('product_location_history')
         .insert([{
           product_id: product.id,
@@ -424,6 +445,10 @@ const QRScanner = () => {
           changed_by: user?.id,
           notes: 'Updated via QR scanner',
         }]);
+
+      if (historyError) {
+        console.error('Failed to record history:', historyError);
+      }
 
       await recordScanAction('location_change', {
         old_location: oldLocation || undefined,
@@ -444,12 +469,54 @@ const QRScanner = () => {
     }
   };
 
+  const handleFlagProduct = async () => {
+    if (!product) return;
+
+    setLoading(true);
+    try {
+      const newStatus = product.status === 'under_review' ? 'available' : 'under_review';
+      
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          status: newStatus,
+          review_notes: newStatus === 'under_review' ? flagNote : null,
+          flagged_at: newStatus === 'under_review' ? new Date().toISOString() : null,
+          flagged_by: newStatus === 'under_review' ? user?.id : null,
+        })
+        .eq('id', product.id);
+
+      if (error) throw error;
+
+      await recordScanAction(newStatus === 'under_review' ? 'flag' : 'unflag', {
+        notes: flagNote || undefined,
+      });
+
+      setProduct({ 
+        ...product, 
+        status: newStatus,
+        review_notes: newStatus === 'under_review' ? flagNote : null,
+      });
+      setFlagNote('');
+      playSound('action');
+      toast.success(newStatus === 'under_review' ? 'Product flagged for review' : 'Product cleared from review');
+      fetchScanHistory(product.id);
+    } catch (error: any) {
+      console.error('Error flagging product:', error);
+      playSound('error');
+      toast.error('Failed to update product status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetScanner = () => {
     setScannedData(null);
     setProduct(null);
     setActivePanel('info');
     setStockChange('');
     setNewLocation('');
+    setFlagNote('');
     setScanHistory([]);
   };
 
@@ -468,6 +535,8 @@ const QRScanner = () => {
       case 'sold': return <ShoppingCart className="w-4 h-4 text-destructive" />;
       case 'stock_up': return <PackagePlus className="w-4 h-4 text-green-500" />;
       case 'location_change': return <MapPin className="w-4 h-4 text-blue-500" />;
+      case 'flag': return <Flag className="w-4 h-4 text-orange-500" />;
+      case 'unflag': return <Check className="w-4 h-4 text-green-500" />;
       case 'view': return <QrCode className="w-4 h-4 text-muted-foreground" />;
       default: return <Clock className="w-4 h-4" />;
     }
@@ -477,7 +546,9 @@ const QRScanner = () => {
     switch (item.action) {
       case 'sold': return `Sold ${Math.abs(item.quantity_change || 0)} units`;
       case 'stock_up': return `Stocked up ${item.quantity_change || 0} units`;
-      case 'location_change': return `Moved location`;
+      case 'location_change': return `Moved to ${item.new_stock}`;
+      case 'flag': return 'Flagged for review';
+      case 'unflag': return 'Cleared from review';
       case 'view': return 'Scanned';
       default: return item.action;
     }
@@ -579,11 +650,28 @@ const QRScanner = () => {
                       <h2 className="text-xl font-bold truncate">{product?.name}</h2>
                       <p className="text-sm text-muted-foreground font-mono mt-1">{product?.product_code}</p>
                     </div>
-                    <Badge variant={getStockStatus().color}>
-                      {getStockStatus().text}
-                    </Badge>
+                    <div className="flex flex-col gap-1 ml-3 items-end">
+                      <Badge variant={getStockStatus().color}>
+                        {getStockStatus().text}
+                      </Badge>
+                      {product?.status === 'under_review' && (
+                        <Badge variant="outline" className="border-orange-500 text-orange-500">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          Under Review
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
+                
+                {/* Review Notes if flagged */}
+                {product?.status === 'under_review' && product.review_notes && (
+                  <div className="px-4 py-2 bg-orange-500/10 border-t border-orange-500/20">
+                    <p className="text-xs text-orange-600 dark:text-orange-400">
+                      <strong>Review Note:</strong> {product.review_notes}
+                    </p>
+                  </div>
+                )}
                 
                 {/* Stock Display */}
                 <div className="p-4 bg-card">
@@ -601,7 +689,7 @@ const QRScanner = () => {
                 </div>
               </Card>
 
-              {/* Quick Actions */}
+              {/* Quick Actions - Sold & Stocking Up */}
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={() => handleQuickSold(1)}
@@ -629,6 +717,7 @@ const QRScanner = () => {
                   { id: 'info', icon: Package, label: 'Info' },
                   { id: 'stock', icon: Boxes, label: 'Stock' },
                   { id: 'location', icon: MapPin, label: 'Move' },
+                  { id: 'flag', icon: Flag, label: 'Flag' },
                   { id: 'history', icon: History, label: 'History' },
                 ].map(({ id, icon: Icon, label }) => (
                   <Button
@@ -714,7 +803,7 @@ const QRScanner = () => {
                   </motion.div>
                 )}
 
-                {/* Stock Panel */}
+                {/* Custom Stock Panel */}
                 {activePanel === 'stock' && (
                   <motion.div
                     key="stock"
@@ -723,43 +812,63 @@ const QRScanner = () => {
                     exit={{ opacity: 0, height: 0 }}
                   >
                     <Card className="border-border/30">
-                      <CardContent className="p-4 space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="stockChange">Custom Stock Change</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="stockChange"
-                              type="number"
-                              placeholder="-5 or +10"
-                              value={stockChange}
-                              onChange={(e) => setStockChange(e.target.value)}
-                              className="rounded-xl"
-                            />
-                            <Button
-                              onClick={handleCustomStockUpdate}
-                              disabled={loading || !stockChange}
-                              className="rounded-xl px-6"
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Use negative numbers to reduce stock
-                          </p>
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base">Custom Stock Update</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('-5')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingDown className="w-4 h-4 mr-1 text-destructive" />
+                            -5
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('-10')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingDown className="w-4 h-4 mr-1 text-destructive" />
+                            -10
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('+5')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                            +5
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStockChange('+10')}
+                            className="flex-1 rounded-xl"
+                          >
+                            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                            +10
+                          </Button>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-2">
-                          {[-10, -5, +5, +10].map((val) => (
-                            <Button
-                              key={val}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setStockChange(val.toString())}
-                              className="rounded-xl"
-                            >
-                              {val > 0 ? `+${val}` : val}
-                            </Button>
-                          ))}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Enter change (e.g., -3 or +5)"
+                            value={stockChange}
+                            onChange={(e) => setStockChange(e.target.value)}
+                            className="rounded-xl"
+                          />
+                          <Button
+                            onClick={handleCustomStockUpdate}
+                            disabled={loading || !stockChange}
+                            className="rounded-xl btn-hero"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -775,35 +884,97 @@ const QRScanner = () => {
                     exit={{ opacity: 0, height: 0 }}
                   >
                     <Card className="border-border/30">
-                      <CardContent className="p-4 space-y-4">
-                        <div className="space-y-2">
-                          <Label>Current Location</Label>
-                          <div className="p-3 bg-muted/30 rounded-xl">
-                            <p className="font-semibold">{product?.location || 'Not Assigned'}</p>
-                          </div>
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base">Change Location</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="px-3 py-1">
+                            Current: {product?.location || 'None'}
+                          </Badge>
+                          <span className="text-muted-foreground">→</span>
+                          <Badge variant="secondary" className="px-3 py-1">
+                            {newLocation || 'Select'}
+                          </Badge>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="newLocation">Move to Location</Label>
-                          <Select value={newLocation} onValueChange={setNewLocation}>
-                            <SelectTrigger className="rounded-xl">
-                              <SelectValue placeholder="Select new location" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {['RA1', 'RA2', 'RA3', 'RA4'].map((loc) => (
-                                <SelectItem key={loc} value={loc} disabled={loc === product?.location}>
-                                  {loc} {loc === product?.location && '(Current)'}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+
+                        <div className="grid grid-cols-4 gap-2">
+                          {['RA1', 'RA2', 'RA3', 'RA4'].map((loc) => (
+                            <Button
+                              key={loc}
+                              variant={newLocation === loc ? 'default' : 'outline'}
+                              onClick={() => setNewLocation(loc)}
+                              disabled={product?.location === loc}
+                              className="rounded-xl"
+                            >
+                              {loc}
+                            </Button>
+                          ))}
                         </div>
+
                         <Button
                           onClick={handleLocationUpdate}
                           disabled={loading || !newLocation || newLocation === product?.location}
-                          className="w-full rounded-xl"
+                          className="w-full rounded-xl btn-hero"
                         >
                           <MapPin className="w-4 h-4 mr-2" />
-                          Update Location
+                          Confirm Move
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Flag Panel */}
+                {activePanel === 'flag' && (
+                  <motion.div
+                    key="flag"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Card className="border-border/30">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Flag className="w-4 h-4" />
+                          Flag for Review
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                          Flag this product if it's damaged, defective, or needs inspection before sale.
+                        </p>
+                        
+                        {product?.status !== 'under_review' && (
+                          <div className="space-y-2">
+                            <Label className="text-xs">Add a note (optional)</Label>
+                            <Textarea
+                              placeholder="e.g., Packaging damaged, needs inspection..."
+                              value={flagNote}
+                              onChange={(e) => setFlagNote(e.target.value)}
+                              className="rounded-xl resize-none"
+                              rows={3}
+                            />
+                          </div>
+                        )}
+
+                        <Button
+                          onClick={handleFlagProduct}
+                          disabled={loading}
+                          variant={product?.status === 'under_review' ? 'default' : 'destructive'}
+                          className="w-full rounded-xl"
+                        >
+                          {product?.status === 'under_review' ? (
+                            <>
+                              <Check className="w-4 h-4 mr-2" />
+                              Clear from Review
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle className="w-4 h-4 mr-2" />
+                              Flag for Review
+                            </>
+                          )}
                         </Button>
                       </CardContent>
                     </Card>
@@ -819,24 +990,43 @@ const QRScanner = () => {
                     exit={{ opacity: 0, height: 0 }}
                   >
                     <Card className="border-border/30">
-                      <CardContent className="p-4">
+                      <CardHeader className="pb-2 pt-4 px-4">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <History className="w-4 h-4" />
+                          Scan History
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2">
                         {scanHistory.length === 0 ? (
-                          <p className="text-center text-muted-foreground py-4">No history yet</p>
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No scan history yet
+                          </p>
                         ) : (
                           <div className="space-y-2 max-h-64 overflow-y-auto">
                             {scanHistory.map((item) => (
-                              <div key={item.id} className="flex items-center gap-3 p-2 bg-muted/20 rounded-lg">
-                                {getActionIcon(item.action)}
+                              <div
+                                key={item.id}
+                                className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                                  {getActionIcon(item.action)}
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium">{formatActionText(item)}</p>
+                                  <p className="font-medium text-sm">{formatActionText(item)}</p>
                                   <p className="text-xs text-muted-foreground">
                                     {new Date(item.scanned_at).toLocaleString()}
                                   </p>
+                                  {item.notes && (
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                      <MessageSquare className="w-3 h-3" />
+                                      {item.notes}
+                                    </p>
+                                  )}
                                 </div>
-                                {item.old_stock !== null && item.new_stock !== null && (
-                                  <div className="text-xs text-muted-foreground">
+                                {(item.old_stock !== null && item.new_stock !== null) && (
+                                  <Badge variant="outline" className="text-xs flex-shrink-0">
                                     {item.old_stock} → {item.new_stock}
-                                  </div>
+                                  </Badge>
                                 )}
                               </div>
                             ))}
@@ -848,11 +1038,11 @@ const QRScanner = () => {
                 )}
               </AnimatePresence>
 
-              {/* Scan New Button */}
+              {/* Scan Another Button */}
               <Button
                 onClick={resetScanner}
                 variant="outline"
-                className="w-full rounded-2xl py-6"
+                className="w-full py-6 rounded-2xl border-2"
               >
                 <QrCode className="w-5 h-5 mr-2" />
                 Scan Another Product

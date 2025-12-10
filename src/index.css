@@ -6,9 +6,7 @@
 /* Razzaq Automotives Design System - Premium Industrial & Modern Tech */
 
 @layer base {
-  /* Dark Theme (Default) */
-  :root,
-  .dark {
+  :root {
     /* Core Brand Colors - Premium Industrial Palette */
     --background: 210 45% 8%; /* Deep Charcoal/Midnight Blue #0B1726 */
     --foreground: 40 15% 96%; /* Off-White #F6F4F2 */
@@ -55,56 +53,10 @@
     --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.15);
     --shadow-accent: 0 4px 20px hsl(43 100% 67% / 0.25);
 
-    /* Enhanced Animations */
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  /* Light Theme */
-  .light {
-    --background: 40 20% 98%; /* Off-white */
-    --foreground: 210 45% 12%; /* Dark charcoal */
-
-    --card: 0 0% 100%;
-    --card-foreground: 210 45% 12%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 45% 12%;
-
-    /* Primary - Energetic Teal */
-    --primary: 177 100% 28%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Secondary */
-    --secondary: 210 20% 94%;
-    --secondary-foreground: 210 45% 12%;
-
-    --muted: 210 15% 92%;
-    --muted-foreground: 210 20% 40%;
-
-    /* Accent - Industrial Gold */
-    --accent: 43 100% 50%;
-    --accent-foreground: 210 45% 8%;
-
-    --destructive: 0 84.2% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 15% 85%;
-    --input: 210 15% 90%;
-    --ring: 177 100% 33%;
-
-    /* Light Mode Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(177 100% 28%), hsl(177 100% 35%));
-    --gradient-hero: linear-gradient(135deg, hsl(40 20% 98%) 0%, hsl(210 20% 96%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 98%));
-    --gradient-accent: linear-gradient(135deg, hsl(43 100% 50%), hsl(43 100% 58%));
-
-    /* Light Mode Shadows */
-    --shadow-premium: 0 20px 50px -10px hsl(210 25% 70% / 0.3);
-    --shadow-card: 0 8px 32px hsl(210 25% 70% / 0.15);
-    --shadow-glow: 0 0 40px hsl(177 100% 33% / 0.1);
-    --shadow-accent: 0 4px 20px hsl(43 100% 50% / 0.2);
+        /* Enhanced Animations */
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 }
 
