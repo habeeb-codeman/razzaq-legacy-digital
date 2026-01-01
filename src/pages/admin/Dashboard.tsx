@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import SEO from '@/components/SEO';
-import razzaqLogo from '@/assets/razzaq-logo.png';
+import razzaqLogo from '@/assets/razzaq-logo-new.png';
 
 interface DashboardStats {
   totalProducts: number;
@@ -140,7 +140,8 @@ const Dashboard = () => {
   ];
 
   const secondaryActions = [
-    { to: '/admin/products/new', icon: Plus, label: 'Add Product' },
+    { to: '/admin/quick-add', icon: Plus, label: 'Quick Add', highlight: true },
+    { to: '/admin/products/new', icon: Plus, label: 'Full Form' },
     { to: '/admin/bulk-import', icon: Upload, label: 'Bulk Import' },
     { to: '/admin/bulk-location-update', icon: MapPin, label: 'Update Locations' },
     { to: '/admin/bills/new', icon: FileText, label: 'Create Bill' },
@@ -158,7 +159,9 @@ const Dashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3">
-              <img src={razzaqLogo} alt="Razzaq Automotives" className="w-10 h-10" />
+              <div className="w-11 h-11 rounded-full overflow-hidden bg-foreground flex-shrink-0">
+                <img src={razzaqLogo} alt="Razzaq Automotives" className="w-full h-full object-cover" />
+              </div>
               <div>
                 <h1 className="font-heading font-bold text-xl text-foreground">Admin Dashboard</h1>
                 <p className="text-accent text-xs font-medium">Razzaq Automotives</p>

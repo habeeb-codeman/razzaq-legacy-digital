@@ -18,6 +18,7 @@ import ProductForm from "./pages/admin/ProductForm";
 import BulkImport from "./pages/admin/BulkImport";
 import BulkLocationUpdate from "./pages/admin/BulkLocationUpdate";
 import QRLabels from "./pages/admin/QRLabels";
+import QuickAddProduct from "./pages/admin/QuickAddProduct";
 import QRScanner from "./pages/QRScanner";
 import InventoryAnalytics from "./pages/admin/InventoryAnalytics";
 import LowStockAlerts from "./pages/admin/LowStockAlerts";
@@ -115,6 +116,14 @@ const App = () => (
               <Route 
                 path="/qr-scanner" 
                 element={<QRScanner />} 
+              />
+              <Route 
+                path="/admin/quick-add" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <QuickAddProduct />
+                  </ProtectedRoute>
+                } 
               />
               <Route 
                 path="/admin/inventory-analytics" 

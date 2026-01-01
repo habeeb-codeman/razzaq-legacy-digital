@@ -159,7 +159,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import razzaqLogo from "@/assets/razzaq-logo.png";
+import razzaqLogo from "@/assets/razzaq-logo-new.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTreasureHunt } from "@/hooks/useTreasureHunt";
 import TreasureHunt from "./TreasureHunt";
@@ -254,18 +254,12 @@ const Navigation = () => {
               whileHover={{ scale: 1.05 }}
               className="flex items-center space-x-3 cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-foreground">
                 <img
                   src={razzaqLogo}
                   alt="Razzaq Automotives"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
-              </div>
-              <div>
-                <h2 className="font-heading font-bold text-xl text-foreground">
-                  Razzaq Automotives
-                </h2>
-                <p className="text-accent text-xs font-medium">Estd. 1976</p>
               </div>
             </motion.div>
           </Link>
