@@ -188,7 +188,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Linkedin } from 'lucide-react';
-import razzaqLogo from '@/assets/razzaq-logo.png';
+import razzaqLogo from '@/assets/razzaq-logo-new.png';
 import { useTreasureHunt } from '@/hooks/useTreasureHunt';
 
 const REVIEW_URL = "https://g.page/r/CVo8voo1GVplEBM/review";
@@ -246,13 +246,14 @@ const Footer = () => {
         >
           {/* Company */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              {/* keep as img — if you use Next/Image replace accordingly */}
-              <img
-                src={razzaqLogo}
-                alt="Razzaq Automotives Logo"
-                className="w-12 h-12 object-contain"
-              />
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-foreground flex-shrink-0">
+                <img
+                  src={razzaqLogo}
+                  alt="Razzaq Automotives Logo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <h3 className="font-heading font-bold text-xl">
                   Razzaq Automotives
