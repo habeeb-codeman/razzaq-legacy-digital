@@ -20,6 +20,7 @@ import BulkLocationUpdate from "./pages/admin/BulkLocationUpdate";
 import QRLabels from "./pages/admin/QRLabels";
 import QRScanner from "./pages/QRScanner";
 import InventoryAnalytics from "./pages/admin/InventoryAnalytics";
+import LowStockAlerts from "./pages/admin/LowStockAlerts";
 import Bills from "./pages/admin/Bills";
 import CreateBill from "./pages/admin/CreateBill";
 import Blog from "./pages/Blog";
@@ -124,6 +125,14 @@ const App = () => (
                 } 
               />
               <Route 
+                path="/admin/low-stock" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <LowStockAlerts />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/admin/bills"
                 element={
                   <ProtectedRoute requireAdmin>
@@ -131,7 +140,7 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              <Route 
+              <Route
                 path="/admin/bills/new" 
                 element={
                   <ProtectedRoute requireAdmin>

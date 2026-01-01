@@ -132,11 +132,11 @@ const Dashboard = () => {
 
   const quickActions = [
     { to: '/admin/products', icon: Package, label: 'Products', color: 'text-accent', description: 'Manage inventory' },
+    { to: '/admin/low-stock', icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500', description: 'Restock alerts' },
     { to: '/admin/inventory-analytics', icon: BarChart3, label: 'Analytics', color: 'text-blue-500', description: 'View insights' },
     { to: '/qr-scanner', icon: QrCode, label: 'QR Scanner', color: 'text-purple-500', description: 'Scan products' },
-    { to: '/admin/blog', icon: BookOpen, label: 'Blog', color: 'text-pink-500', description: 'Manage posts' },
     { to: '/admin/bills', icon: Receipt, label: 'Billing', color: 'text-green-500', description: 'Create invoices' },
-    { to: '/admin/qr-labels', icon: Printer, label: 'QR Labels', color: 'text-orange-500', description: 'Print labels' },
+    { to: '/admin/blog', icon: BookOpen, label: 'Blog', color: 'text-pink-500', description: 'Manage posts' },
   ];
 
   const secondaryActions = [
