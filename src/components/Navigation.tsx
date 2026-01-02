@@ -254,12 +254,16 @@ const Navigation = () => {
               whileHover={{ scale: 1.05 }}
               className="flex items-center space-x-3 cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-foreground">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border border-border/30">
                 <img
                   src={razzaqLogo}
                   alt="Razzaq Automotives"
                   className="w-full h-full object-cover"
                 />
+              </div>
+              <div className="hidden sm:block">
+                <h2 className="font-heading font-bold text-lg text-foreground leading-tight">Razzaq Automotives</h2>
+                <p className="text-accent text-xs font-medium">Since 1976</p>
               </div>
             </motion.div>
           </Link>

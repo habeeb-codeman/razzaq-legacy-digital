@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_number: string
+          quotation_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_number: string
+          quotation_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_number?: string
+          quotation_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_orders_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: true
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bill_items: {
         Row: {
           bill_id: string
@@ -241,6 +279,57 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_picked: boolean
+          order_id: string
+          picked_at: string | null
+          picked_by: string | null
+          quantity: number
+          quotation_item_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_picked?: boolean
+          order_id: string
+          picked_at?: string | null
+          picked_by?: string | null
+          quantity?: number
+          quotation_item_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_picked?: boolean
+          order_id?: string
+          picked_at?: string | null
+          picked_by?: string | null
+          quantity?: number
+          quotation_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_quotation_item_id_fkey"
+            columns: ["quotation_item_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_categories: {
         Row: {
           created_at: string
@@ -392,6 +481,99 @@ export type Database = {
           },
         ]
       }
+      quotation_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          product_id: string | null
+          quantity: number
+          quotation_id: string
+          rate: number
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          quotation_id: string
+          rate: number
+          total_amount: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          quotation_id?: string
+          rate?: number
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          comments: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          party_address: string | null
+          party_name: string
+          quotation_number: string
+          status: Database["public"]["Enums"]["quotation_status"]
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          vehicle_number: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          party_address?: string | null
+          party_name: string
+          quotation_number: string
+          status?: Database["public"]["Enums"]["quotation_status"]
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          vehicle_number?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          party_address?: string | null
+          party_name?: string
+          quotation_number?: string
+          status?: Database["public"]["Enums"]["quotation_status"]
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          vehicle_number?: string | null
+        }
+        Relationships: []
+      }
       scan_history: {
         Row: {
           action: string
@@ -469,9 +651,11 @@ export type Database = {
     }
     Functions: {
       generate_bill_number: { Args: never; Returns: string }
+      generate_order_number: { Args: never; Returns: string }
       generate_product_code:
         | { Args: never; Returns: string }
         | { Args: { p_location: string }; Returns: string }
+      generate_quotation_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -482,7 +666,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      order_status: "picking" | "ready" | "dispatched" | "completed"
       product_location: "RA1" | "RA2" | "RA3" | "RA4"
+      quotation_status: "pending" | "accepted" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -611,7 +797,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      order_status: ["picking", "ready", "dispatched", "completed"],
       product_location: ["RA1", "RA2", "RA3", "RA4"],
+      quotation_status: ["pending", "accepted", "declined"],
     },
   },
 } as const
